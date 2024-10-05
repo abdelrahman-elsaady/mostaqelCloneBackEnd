@@ -29,7 +29,7 @@ const skillRoutes = require('./routes/skills');
 
 
 
-mongoose.connect('mongodb+srv://rehab:rehab123@cluster0.9o18wq0.mongodb.net/Mostaql').then(()=>{
+mongoose.connect(`${process.env.MYDB}`).then(()=>{
   console.log("connect on database succsesfully");
 }).catch((err) => {
 
