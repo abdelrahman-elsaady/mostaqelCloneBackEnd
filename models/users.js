@@ -82,6 +82,26 @@ let usersSchema = mongoose.Schema({
         min: 0,
         max: 100
       },
+      messages: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'message'
+      }],
+      availableBalance: {
+        type: Number,
+        default: 0
+      },
+      pendingBalance: {
+        type: Number,
+        default: 0
+      },
+      totalBalance: {
+        type: Number,
+        default: 0
+      },
+      withdrawableBalance: {
+        type: Number,
+        default: 0
+      },
       averageResponseTime: {
         type: Number,
         default: 0
