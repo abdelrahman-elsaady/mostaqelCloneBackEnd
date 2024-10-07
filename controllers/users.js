@@ -14,7 +14,7 @@ let showUsers = async (req, res, next) => {
 
 let getUserByID = async (req, res, next) => {
   let { id } = req.params;
-  let user = await userModel.findById(id);
+  let user = await userModel.findById(id).populate('skills');
 
   try {
     if (user) {

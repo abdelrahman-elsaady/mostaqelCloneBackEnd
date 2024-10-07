@@ -64,12 +64,17 @@ let usersSchema = mongoose.Schema({
         type: String,
         // required: true
       },
-      rating: {
+      averageRating: {
         type: Number,
         default: 0,
         min: 0,
         max: 5
       },
+      reviews: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review'
+      }],
+      
       projectCompletionRate: {
         type: Number,
         default: 0,
@@ -111,10 +116,8 @@ let usersSchema = mongoose.Schema({
         default: 0
       },
       portfolio: [{
-        title: String,
-        description: String,
-        link: String,
-        image: String
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Portfolio'
       }],
       languages: [{
         language: String,

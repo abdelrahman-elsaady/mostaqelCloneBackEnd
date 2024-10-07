@@ -1,6 +1,7 @@
 const express = require("express");
 let router = express.Router();
-let {author,restrictTo}=require('../middlewares/authorization')
+
+// let {author,restrictTo}=require('../middlewares/authorization')
 
 let {
   showProposals,

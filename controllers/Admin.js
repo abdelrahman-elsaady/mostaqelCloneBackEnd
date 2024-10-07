@@ -12,6 +12,7 @@ let generateToken = (id) => {
 // Register a new admin
 let registerAdmin = async (req, res) => {
   const { username, password, email } = req.body;
+  
 
   try {
     const adminExists = await Admin.findOne({ email });

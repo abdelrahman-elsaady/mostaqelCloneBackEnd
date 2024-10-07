@@ -12,7 +12,8 @@ router.delete('/:id',author, deleteUser)
 router.patch('/:id' , author,updateUser)
 router.post ('/login',Login)
 router.patch ('/updatePassword',author,updatePassword)
-
+ 
+  
 
 
 module.exports=router

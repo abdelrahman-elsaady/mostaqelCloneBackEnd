@@ -24,6 +24,7 @@ const complaintRoutes = require('./routes/Complaint');
 const adminRoutes = require('./routes/Admin');
 const Notification = require('./routes/Notification');
 const skillRoutes = require('./routes/skills');
+const portfolioRoutes = require('./routes/Portfolio');
 
 //const authRouter = require('./routes/auth')
 
@@ -63,7 +64,7 @@ app.use('/complaints', complaintRoutes);
 app.use('/admins', adminRoutes);
 app.use('/notifications', Notification);
 app.use('/skills', skillRoutes);
-
+app.use('/portfolio', portfolioRoutes);
 
 app.use('*' , function(req , res , next){
   next({statusCode:404 , message : "not found"})
