@@ -1,4 +1,4 @@
-const Admin = require('../models/Admin');
+const adminModel = require('./../models/Admin');
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcryptjs");
 
@@ -41,20 +41,20 @@ let registerAdmin = async (req, res) => {
 
 // Login an admin
 let loginAdmin = async (req, res) => {
-  console.log("aboda");
   let { email, password } = req.body;
+  console.log({email , password});
   if (!email || !password) {
     return res
       .status(400)
       .json({ message: "Please provide email and password" });
   }
-  let user = await Admin.findOne({ email: email });
+  let user = await adminModel.findOne({ email: email });
   if (!user) {
-    return res.status(100).json({ message: "Invalid email or password" });
+    return res.status(401).json({ message: "Invalid email or password" });
   }
   let isvalid = await bcrypt.compare(password, user.password);
   if (!isvalid) {
-    return res.status(200).json({ message: "Invalid email or password" });
+    return res.status(401).json({ message: "Invalid email or password" });
   }
 
   let token = jwt.sign(

@@ -4,18 +4,15 @@ const skillSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true,
     trim: true
   },
   category: {
-    type: String,
-    required: true,
-    trim: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'categories',
+    // required: true
   },
-  description: {
-    type: String,
-    trim: true
-  }
+  
 }, { timestamps: true });
 
 const Skill = mongoose.model('Skill', skillSchema);

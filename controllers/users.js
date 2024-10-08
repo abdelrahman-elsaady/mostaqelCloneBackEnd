@@ -74,7 +74,8 @@ let updateUser = async (req, res, next) => {
 };
 
 let Login = async (req, res) => {
-  console.log("aboda");
+  
+  console.log(req.body);
   let { email, password } = req.body;
   if (!email || !password) {
     return res
@@ -89,6 +90,7 @@ let Login = async (req, res) => {
   if (!isvalid) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
+
 
   let token = jwt.sign(
     { id: user._id, email: user.email, role: user.role },

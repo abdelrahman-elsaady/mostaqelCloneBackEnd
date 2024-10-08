@@ -2,8 +2,8 @@ const categoriesModel = require("../models/categories");
 
 let showCategories = async (req, res) => {
   try {
-    let users = await categoriesModel.find();
-    res.status(200).json({ message: "success", users });
+    let categories = await categoriesModel.find();
+    res.status(200).json({ message: "success", categories });
   } catch (err) {
     res.status(404).json(err);
   }
