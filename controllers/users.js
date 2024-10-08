@@ -29,10 +29,16 @@ let saveUser = async (req, res) => {
   console.log("Asas");
   try {
     let newUser = req.body;
-    console.log(newUser);  
+    const existingUser = await userModel.findOne({ email: newUser.email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+    console.log(newUser); 
+     
     await userModel.create(newUser);
     res.status(200).json({ message: "user saved successfully" });
   } catch (err) {
+    console.log(err);
     res.status(404).json(err);
   }
 };

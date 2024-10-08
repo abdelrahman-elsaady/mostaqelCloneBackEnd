@@ -23,8 +23,8 @@ let usersSchema = mongoose.Schema({
       },
       email: {
         type: String,
-        // required: [true, 'Email address is required'],
-        // unique: true,
+        required: [true, 'Email address is required'],
+        unique: true,
         trim: true,
         lowercase: true,
         validate: [validator.isEmail, 'Invalid email address']
@@ -37,19 +37,14 @@ let usersSchema = mongoose.Schema({
       profileName: {
         type: String,
         // required: true,
-        unique: true,
+        // unique: true,
         trim: true
       },
-      username: {
-        type: String,
-        required: true,
-        unique: true
-      },
-      // jobTitle: { type: String, required: true, trim: true },
+  
+      jobTitle: { type: String, trim: true },
 
       profilePicture: {
         type: String,
-        default: './static/user.png'
       },
       bio: { type: String, trim: true },
 
