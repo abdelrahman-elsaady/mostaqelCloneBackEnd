@@ -5,10 +5,18 @@ const projectModel = require('../models/project');
 
 
 let createProject = async (req, res , next) => {
+
   let newProject = req.body;
+
+  console.log(newProject)
   try {
     let project = await projectModel.create(newProject);
+
+
+
     res.status(200).json({ message: "user project successfully", data: project });
+     
+
   } catch (err) {
     next({statusCode:404})
   }
@@ -21,8 +29,8 @@ let getProjects = async (req, res) => {
     const projects = await projectModel.find()
     .populate('client')
     .populate('category', 'name')
-    .populate('proposalsCount')
     .populate('skills')
+    .populate('proposals', 'freelancer amount deliveryTime proposal status')  
     .sort({ createdAt: -1 });
 
     res.status(200).json(projects);
@@ -69,11 +77,14 @@ let getProjectById = async (req, res) => {
   try {
     const project = await projectModel.findById( id ).populate('skills')
     .populate('category')
-    .populate('proposalsCount')
     .populate('client')
     .populate({
-      path: 'proposals.freelancer'
-    });;
+      path: 'proposals',
+      populate: {
+        path: 'freelancer',
+        // select: 'name email profilePicture' 
+      }
+    });
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
@@ -114,4 +125,20 @@ let deleteProject = async (req, res) => {
   }
 };
 
-module.exports={createProject , getProjects  , updateProject , deleteProject, getProjectById, saveProposal }
+// let updateProposal = async (req, res) => {
+//   console.log(req.body)
+//   console.log(req.params)
+//   try {
+//     const { id } = req.params;
+//     const updatedProposal = req.body;
+
+//     const project = await projectModel.findByIdAndUpdate(id, updatedProposal, { new: true });
+//     res.status(200).json({ message: "Proposal updated successfully", proposal: project });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Error updating proposal", error: error.message });
+//   }
+// }
+
+
+module.exports={createProject , getProjects  , getProjectById, updateProject , deleteProject, saveProposal  }

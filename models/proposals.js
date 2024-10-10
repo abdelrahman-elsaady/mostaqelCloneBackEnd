@@ -2,7 +2,7 @@
 
 // const { number } = require('joi');
 const mongoose = require('mongoose')
-
+ 
 const Schema = mongoose.Schema;
 
 const proposalSchema = new Schema({
@@ -22,6 +22,10 @@ const proposalSchema = new Schema({
         required: true
       },
       deliveryTime: {
+        type: Number,
+        required: true
+      },
+      receivables: {
         type: Number,
         required: true
       },

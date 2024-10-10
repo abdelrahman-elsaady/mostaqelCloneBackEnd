@@ -52,41 +52,10 @@ const ProjectSchema = new mongoose.Schema({
     ref: 'user',
     // required: true
   },
-  proposals:[{
-
-
-    freelancer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'user',
-      // required: true
-    },
-    amount: {
-      type: Number,
-      // required: true
-    },
-    deliveryTime: {
-      type: Number,
-      // required: true
-    },
-    proposal: {
-      type: String,
-      // required: true
-    },
-    status: {
-      type: String,
-      enum: ['pending', 'accepted', 'rejected'],
-      default: 'pending'
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }] ,
-    
+  proposals: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'proposals'
+  }],
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'categories',

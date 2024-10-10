@@ -45,6 +45,7 @@ let usersSchema = mongoose.Schema({
 
       profilePicture: {
         type: String,
+        default:"https://th.bing.com/th/id/OIP.yYH0Z8hoEboWVtgM6i0xeQHaEK?rs=1&pid=ImgDetMain"
       },
       bio: { type: String, trim: true },
 
