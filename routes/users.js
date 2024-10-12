@@ -9,7 +9,7 @@ router.get('/' , showUsers)
 router.post('/' , saveUser)
 router.get('/:id' , getUserByID)
 router.delete('/:id',author, deleteUser)
-router.patch('/:id' , author,updateUser)
+router.patch('/:id' ,updateUser)
 router.post ('/login',Login)
 router.patch ('/updatePassword',author,updatePassword)
  

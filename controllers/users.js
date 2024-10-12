@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 let showUsers = async (req, res, next) => {
   try {
-    let users = await userModel.find();
+    let users = await userModel.find().populate('category');
     res.status(200).json({ message: "success", users });
   } catch (err) {
     res.status(404).json(err);
@@ -14,7 +14,7 @@ let showUsers = async (req, res, next) => {
 
 let getUserByID = async (req, res, next) => {
   let { id } = req.params;
-  let user = await userModel.findById(id).populate('skills');
+  let user = await userModel.findById(id).populate('category').populate('skills');
 
   try {
     if (user) {
@@ -29,17 +29,21 @@ let saveUser = async (req, res) => {
   console.log("Asas");
   try {
     let newUser = req.body;
+
     const existingUser = await userModel.findOne({ email: newUser.email });
+
     if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(200).json({ message: "Email already exists" });
     }
+    
     console.log(newUser); 
      
     await userModel.create(newUser);
     res.status(200).json({ message: "user saved successfully" });
+
   } catch (err) {
-    console.log(err);
-    res.status(404).json(err);
+    // console.log(err);
+    res.status(404).json({ message: "failed to save user" });
   }
 };
 

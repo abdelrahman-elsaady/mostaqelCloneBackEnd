@@ -40,6 +40,10 @@ let usersSchema = mongoose.Schema({
         // unique: true,
         trim: true
       },
+      category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'categories'
+      },
   
       jobTitle: { type: String, trim: true },
 
