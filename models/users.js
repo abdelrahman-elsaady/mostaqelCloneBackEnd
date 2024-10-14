@@ -9,17 +9,20 @@ let usersSchema = mongoose.Schema({
     firstName: {
         type: String,
         // required: true,
-        trim: true
+        trim: true,
+        default:''
       },
       lastName: {
         type: String,
         // required: true,
-        trim: true
+        trim: true,
+        default:''
       },
       jobtitle: {
         type: String,
         // required: true,
-        trim: true
+        trim: true,
+        default:''
       },
       email: {
         type: String,
@@ -38,20 +41,23 @@ let usersSchema = mongoose.Schema({
         type: String,
         // required: true,
         // unique: true,
-        trim: true
+        trim: true,
+        default:''
       },
       category: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'categories'
+        ref: 'categories',
+        default:"67057b9b9c7a9f52039a0242"
       },
   
-      jobTitle: { type: String, trim: true },
+      
+      jobTitle: { type: String, trim: true,default:'' },
 
       profilePicture: {
         type: String,
         default:"https://th.bing.com/th/id/OIP.yYH0Z8hoEboWVtgM6i0xeQHaEK?rs=1&pid=ImgDetMain"
       },
-      bio: { type: String, trim: true },
+      bio: { type: String, trim: true,default:'' },
 
       skills: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
 
@@ -59,10 +65,12 @@ let usersSchema = mongoose.Schema({
         type: String,
         enum: ['client', 'freelancer'],
         // required: true
+        default:'client'
       },
       location: {
         type: String,
         // required: true
+        default:''
       },
       averageRating: {
         type: Number,
@@ -74,13 +82,14 @@ let usersSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Review'
       }],
-      
+      gender: {type: String,default:''},
       projectCompletionRate: {
         type: Number,
         default: 0,
         min: 0,
         max: 100
       },
+      dateOfBirth: {type: Date,default:''},
       onTimeDeliveryRate: {
         type: Number,
         default: 0,
@@ -119,17 +128,12 @@ let usersSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Portfolio'
       }],
-      languages: [{
-        language: String,
-        proficiency: {
-          type: String,
-          enum: ['Basic', 'Conversational', 'Fluent', 'Native']
-        }
-      }],
+      languages: {type: String, trim: true,default:"arabic"},
       hourlyRate: {
         type: Number,
         min: 0
       },
+
       statistics: {
         completionRate: { type: Number, default: 0 },
         onTimeDeliveryRate: { type: Number, default: 0 },
@@ -140,6 +144,11 @@ let usersSchema = mongoose.Schema({
       isVerified: {
         type: Boolean,
         default: false
+      },
+      country: {
+        type: String,
+        default:''
+        // required: true
       },
       joinDate: {
         type: Date,

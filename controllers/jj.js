@@ -565,3 +565,47 @@
         
           // ... rest of the component code ...
         }
+
+
+
+        const express = require('express');
+const multer = require('multer');
+const { updateUser } = require('../controllers/userController');
+const auth = require('../middleware/auth');
+
+const router = express.Router();
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/') // Make sure this directory exists
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname)
+  }
+});
+
+const upload = multer({ storage: storage });
+
+router.patch('/:id', auth, upload.single('profilePicture'), updateUser);
+
+module.exports = router;
+
+
+exports.updateUser = async (req, res) => {
+  try {
+    const updates = req.body;
+    if (req.file) {
+      updates.profilePicture = req.file.path;
+    }
+    if (updates.skills) {
+      updates.skills = JSON.parse(updates.skills);
+    }
+    const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true });
+    if (!user) {
+      return res.status(404).send();
+    }
+    res.send(user);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};

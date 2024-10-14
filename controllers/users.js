@@ -14,6 +14,7 @@ let showUsers = async (req, res, next) => {
 
 let getUserByID = async (req, res, next) => {
   let { id } = req.params;
+  console.log(id);
   let user = await userModel.findById(id).populate('category').populate('skills');
 
   try {
@@ -36,13 +37,13 @@ let saveUser = async (req, res) => {
       return res.status(200).json({ message: "Email already exists" });
     }
     
-    console.log(newUser); 
-     
+    
     await userModel.create(newUser);
     res.status(200).json({ message: "user saved successfully" });
+    console.log(newUser); 
 
   } catch (err) {
-    // console.log(err);
+    console.log(err);
     res.status(404).json({ message: "failed to save user" });
   }
 };
@@ -66,7 +67,15 @@ let deleteUser = async (req, res) => {
 };
 let updateUser = async (req, res, next) => {
   try {
-    let user = await userModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    let updates = req.body;
+    console.log(updates);
+    if (req.file) {
+      updates.profilePicture = req.file.path;
+    }
+    if (updates.skills) {
+      updates.skills = JSON.parse(updates.skills);
+    }
+    let user = await userModel.findByIdAndUpdate(req.params.id, updates, { new: true });
     res.json({ message: "User was edited successfully", user: user });
 } catch (err) {
     if (err.name === 'ValidationError') {
