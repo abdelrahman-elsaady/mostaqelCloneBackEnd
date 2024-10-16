@@ -12,15 +12,18 @@ let charge = async (req, res) => {
         const { id, amount } = req.body;
 
 
-        console.log("Creating payment intent for amount:", amount);
 
+        console.log("Creating payment intent for amount:", amount);
+if (!stripe) {
+      throw new Error('Stripe is not initialized. Check your STRIPE_SECRET_KEY.');
+    }
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency: 'USD',
             description: 'Deposit to account',
             payment_method: id,
             confirm: true,
-            return_url: `${process.env.FRONTEND_URL}`, // Add this line
+            return_url: `https://mostaqel-clone.vercel.app/freelancers`, // Add this line
         });
 
         console.log("Payment intent created:", paymentIntent.id);
@@ -39,5 +42,8 @@ let charge = async (req, res) => {
         });
     }
 }
+
+
+
 
 module.exports = {charge};
