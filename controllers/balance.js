@@ -7,8 +7,10 @@ let charge = async (req, res) => {
 
 
     
+    
     try {
         const { id, amount } = req.body;
+
 
         console.log("Creating payment intent for amount:", amount);
 
