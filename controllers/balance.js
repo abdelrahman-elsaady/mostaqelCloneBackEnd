@@ -6,7 +6,7 @@ let charge = async (req, res) => {
     console.log("Received charge request:", req.body);
 
 
-    
+
     
     try {
         const { id, amount } = req.body;
@@ -20,7 +20,7 @@ let charge = async (req, res) => {
             description: 'Deposit to account',
             payment_method: id,
             confirm: true,
-            return_url: `${process.env.FRONTEND_URL}/freelancers`, // Add this line
+            return_url: `${process.env.FRONTEND_URL}`, // Add this line
         });
 
         console.log("Payment intent created:", paymentIntent.id);
