@@ -8,10 +8,10 @@ let {saveUser , showUsers , getUserByID , deleteUser , updateUser ,  Login ,upda
 // Configure multer for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, './static') // Make sure this directory exists
+    return  cb(null, './static/users') // Make sure this directory exists
     },
     filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname)) // Appending extension
+     return cb(null, `${Date.now()}-${file.originalname}`) // Appending extension
     }
   });
   

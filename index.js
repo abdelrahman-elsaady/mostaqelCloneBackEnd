@@ -25,7 +25,7 @@ const adminRoutes = require('./routes/Admin');
 const Notification = require('./routes/Notification');
 const skillRoutes = require('./routes/skills');
 const portfolioRoutes = require('./routes/Portfolio');
-
+const balanceRoutes = require('./routes/balance');
 
 //const authRouter = require('./routes/auth')
 
@@ -66,6 +66,8 @@ app.use('/admins', adminRoutes);
 app.use('/notifications', Notification);
 app.use('/skills', skillRoutes);
 app.use('/portfolio', portfolioRoutes);
+app.use('/balance', balanceRoutes);
+
 
 app.use('*' , function(req , res , next){
   next({statusCode:404 , message : "not found"})

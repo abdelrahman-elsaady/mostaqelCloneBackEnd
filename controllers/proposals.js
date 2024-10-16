@@ -1,6 +1,6 @@
 const proposalModel = require("../models/proposals");
 const projectModel = require("../models/project");
-
+const userModel = require("../models/users");
 
 let showProposals = async (req, res) => {
   try {
@@ -62,10 +62,12 @@ let saveProposal = async (req, res) => {
     let savedUser = await proposalModel.create(newProposal);
 
     await projectModel.findByIdAndUpdate(newProposal.project, { $push: { proposals: savedUser._id } });
+    await userModel.findByIdAndUpdate(newProposal.freelancer, { $push: { proposals: savedUser._id } });
     res.status(200).json({ message: "proposal saved successfully", data: savedUser });
   } catch (err) {
     res.status(404).json(err.message);
   }
+  
 };
 let updateProposalById = async (req, res) => {
 

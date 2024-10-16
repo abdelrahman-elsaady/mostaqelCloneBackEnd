@@ -150,6 +150,10 @@ let usersSchema = mongoose.Schema({
         default:''
         // required: true
       },
+      proposals: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'proposals'
+      }],
       joinDate: {
         type: Date,
         default: Date.now

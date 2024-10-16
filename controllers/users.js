@@ -14,8 +14,17 @@ let showUsers = async (req, res, next) => {
 
 let getUserByID = async (req, res, next) => {
   let { id } = req.params;
-  console.log(id);
-  let user = await userModel.findById(id).populate('category').populate('skills');
+  // console.log("aboda");
+
+  let user = await userModel.findById(id).populate('category').populate('skills').populate('portfolio') .populate({
+    path: 'proposals',
+    populate: {
+      path: 'project',
+      populate: {
+        path: 'client',
+      }
+    }
+  });
 
   try {
     if (user) {
@@ -27,6 +36,7 @@ let getUserByID = async (req, res, next) => {
 };
 
 let saveUser = async (req, res) => {
+
   console.log("Asas");
   try {
     let newUser = req.body;
@@ -65,19 +75,24 @@ let deleteUser = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
 let updateUser = async (req, res, next) => {
+  console.log("aboda");
   try {
     let updates = req.body;
     console.log(updates);
     if (req.file) {
-      updates.profilePicture = req.file.path;
+      updates.profilePicture = req.file.filename;
     }
+
+    
     if (updates.skills) {
       updates.skills = JSON.parse(updates.skills);
     }
     let user = await userModel.findByIdAndUpdate(req.params.id, updates, { new: true });
-    res.json({ message: "User was edited successfully", user: user });
+    res.status(200).json({ message: "User was edited successfully", user: user });
 } catch (err) {
+
     if (err.name === 'ValidationError') {
         res.status(400).json({ message: "Validation Error", error: err.message });
     } else {
