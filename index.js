@@ -9,6 +9,33 @@ app.use(cors({
   origin:'*'
 }))
 
+const http = require('http');
+const { Server } = require("socket.io");
+const socketIo = require('socket.io');
+
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your client's URL
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+
+
+
+
+
 env.config()
 
 
@@ -26,7 +53,8 @@ const Notification = require('./routes/Notification');
 const skillRoutes = require('./routes/skills');
 const portfolioRoutes = require('./routes/Portfolio');
 const balanceRoutes = require('./routes/balance');
-
+const conversationRoutes = require('./routes/conversation');
+const messageRoutes = require('./routes/messages');
 //const authRouter = require('./routes/auth')
 
 
@@ -67,6 +95,8 @@ app.use('/notifications', Notification);
 app.use('/skills', skillRoutes);
 app.use('/portfolio', portfolioRoutes);
 app.use('/balance', balanceRoutes);
+app.use('/conversations', conversationRoutes);
+app.use('/messages', messageRoutes);
 
 
 app.use('*' , function(req , res , next){
@@ -75,8 +105,8 @@ app.use('*' , function(req , res , next){
 
 
 
-app.listen(3344,()=>{
 
- console.log("Connect successfully");
-
-})
+const PORT = 3344;
+server.listen(PORT, () => {
+  console.log(`Socket.IO server running on port ${PORT}`);
+});

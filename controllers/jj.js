@@ -609,3 +609,87 @@ exports.updateUser = async (req, res) => {
     res.status(400).send(error);
   }
 };
+
+
+
+
+// ... existing imports ...
+import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
+
+export default function Navbar() {
+  // ... existing code ...
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      const newSocket = io('http://localhost:3344');
+      setSocket(newSocket);
+
+      return () => newSocket.close();
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('newMessage', () => {
+        setUnreadMessages((prev) => prev + 1);
+      });
+    }
+  }, [socket]);
+
+  const handleMessagesClick = () => {
+    setUnreadMessages(0);
+    // Navigate to messages page
+  };
+
+  // ... existing code ...
+
+  return (
+    // ... existing JSX ...
+    <li className={`nav-item ${styles.navItem}`}>
+      <Link className="nav-link text-white position-relative" href="/messages" onClick={handleMessagesClick}>
+        <FaEnvelope />
+        {unreadMessages > 0 && (
+          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {unreadMessages}
+          </span>
+        )}
+      </Link>
+    </li>
+
+    // ... existing JSX ...
+  );
+}
+
+
+const express = require('express');
+const http = require('http');
+const { Server } = require("socket.io");
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your client's URL
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+const PORT = 3344;
+
+server.listen(PORT, () => {
+  console.log(`Socket.IO server running on port ${PORT}`);
+});
