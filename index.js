@@ -132,6 +132,9 @@ app.use('/conversations', conversationRoutes);
 app.use('/messages', messageRoutes);
 app.use('/transactions', transactionRoutes);
 app.use('/paypal', paypalRoutes);
+app.use('/',(req,res)=>{
+  res.send("hello world")
+});
 app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
 })
