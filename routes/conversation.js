@@ -15,10 +15,12 @@ router.get('/user/:id',  async (req, res) => {
     try {
       const userId = req.params.id;
       console.log(userId);
+      console.log("req.params");
       const conversations = await Conversation.find({
         $or: [{ client: userId }, { freelancerId: userId }]
       })
       .populate('projectId', 'title')
+
       .populate({
         path: 'client freelancerId',
         select: 'firstName lastName jobTitle profilePicture',

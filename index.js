@@ -139,7 +139,7 @@ app.use('*', function (req, res, next) {
 
 
 
-const PORT = 3344;
+const PORT = process.env.MYPORT;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
