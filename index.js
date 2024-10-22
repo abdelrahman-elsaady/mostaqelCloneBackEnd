@@ -18,7 +18,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://mostaqel-clone.vercel.app/"],
+    origin: ["http://localhost:3000", "https://mostaqel-clone.vercel.app"],
     methods: ["GET", "POST"],
     credentials: true
   }
