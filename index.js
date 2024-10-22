@@ -4,14 +4,14 @@ let cors = require('cors')
 
 let env = require('dotenv')
 const app = express();
-
-app.use(cors({
-  origin:'*'
-}))
-
 const http = require('http');
 const { Server } = require("socket.io");
-const socketIo = require('socket.io');
+
+app.use(cors({
+  origin: '*'
+}))
+
+// const socketIo = require('socket.io');
 
 
 const server = http.createServer(app);
@@ -22,15 +22,45 @@ const io = new Server(server, {
     methods: ["GET", "POST"]
   }
 });
+const connectedUsers = new Map();
 
 io.on('connection', (socket) => {
   console.log('A user connected');
   
+  socket.on('userConnected', (userId) => {
+    connectedUsers.set(userId, socket.id);
+    socket.join(userId); 
+    console.log(`User ${userId} connected`);
+  });
+
+  socket.on('joinConversation', (conversationId) => {
+    socket.join(conversationId);
+    console.log(`User joined conversation: ${conversationId}`);
+  });
+
+
+  // io.on('connection', (socket) => {
+  //   socket.on('joinConversation', (conversationId) => {
+  //     socket.join(conversationId);
+  //   });
+  
+  //   socket.on('newMessage', (message) => {
+  //     io.to(message.conversationId).emit('newMessage', message);
+  //   });
+  // });
+
+
+
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    for (let [userId, socketId] of connectedUsers.entries()) {
+      if (socketId === socket.id) {
+        connectedUsers.delete(userId);
+        console.log(`User ${userId} disconnected`);
+        break;
+      }
+    }
   });
 });
-
 
 
 
@@ -55,16 +85,18 @@ const portfolioRoutes = require('./routes/Portfolio');
 const balanceRoutes = require('./routes/balance');
 const conversationRoutes = require('./routes/conversation');
 const messageRoutes = require('./routes/messages');
+const transactionRoutes = require('./routes/trnsactions');
+const paypalRoutes = require('./routes/paypal');
 //const authRouter = require('./routes/auth')
 
 
 
-mongoose.connect(`${process.env.MYDB}`).then(()=>{
+mongoose.connect(`${process.env.MYDB}`).then(() => {
   console.log("connect on database succsesfully");
 }).catch((err) => {
 
   console.log(err);
-  
+
 })
 
 
@@ -74,21 +106,21 @@ app.use(express.json())
 
 
 //error handelling middelware
-app.use((err , req ,res , next)=>{
-  let statusCode = err.statusCode?err.statusCode:500
-  res.status(statusCode).send({message : err.message})
+app.use((err, req, res, next) => {
+  let statusCode = err.statusCode ? err.statusCode : 500
+  res.status(statusCode).send({ message: err.message })
 })
 
 app.use(express.json())
 
-app.use('/users',userRouter)
-app.use('/jobs',jobsRouter)
-app.use('/messages',messageRouter)
-app.use('/payment',paymentRouter)
-app.use('/categories',categoriesRouter)
-app.use('/proposals',proposalsRouter)
-app.use('/reviews',reviewsRouter)
-app.use('/projects',projectRouter)
+app.use('/users', userRouter)
+app.use('/jobs', jobsRouter)
+app.use('/messages', messageRouter)
+app.use('/payment', paymentRouter)
+app.use('/categories', categoriesRouter)
+app.use('/proposals', proposalsRouter)
+app.use('/reviews', reviewsRouter)
+app.use('/projects', projectRouter)
 app.use('/complaints', complaintRoutes);
 app.use('/admins', adminRoutes);
 app.use('/notifications', Notification);
@@ -97,16 +129,20 @@ app.use('/portfolio', portfolioRoutes);
 app.use('/balance', balanceRoutes);
 app.use('/conversations', conversationRoutes);
 app.use('/messages', messageRoutes);
-
-
-app.use('*' , function(req , res , next){
-  next({statusCode:404 , message : "not found"})
- })
+app.use('/transactions', transactionRoutes);
+app.use('/paypal', paypalRoutes);
+app.use('*', function (req, res, next) {
+  next({ statusCode: 404, message: "not found" })
+})
 
 
 
 
 const PORT = 3344;
 server.listen(PORT, () => {
-  console.log(`Socket.IO server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
+
+// Make io accessible to our router
+app.set('io', io);
+app.set('connectedUsers', connectedUsers);

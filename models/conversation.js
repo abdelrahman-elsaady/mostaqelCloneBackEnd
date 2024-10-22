@@ -13,6 +13,10 @@ const ConversationSchema = new mongoose.Schema({
     ref: 'user',
     required: true
   },
+  status: {
+    type: String,
+    default: 'open'
+  },
   
   freelancerId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -26,6 +30,11 @@ const ConversationSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  proposalId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'proposals',
+    required: true
   },
   updatedAt: {
     type: Date,

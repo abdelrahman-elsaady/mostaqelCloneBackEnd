@@ -2,9 +2,11 @@ const express = require('express')
 let router = express.Router()
 const multer = require('multer');
 const path = require('path');
+const userModel = require('../models/users');
+
 let {author,restrictTo}=require('../middlewares/authorization')
 
-let {saveUser , showUsers , getUserByID , deleteUser , updateUser ,  Login ,updatePassword } = require('../controllers/users')
+let {saveUser , showUsers , getUserByID , deleteUser , updateUser ,  Login ,updatePassword ,getUserByEmail } = require('../controllers/users')
 // Configure multer for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -18,6 +20,7 @@ const storage = multer.diskStorage({
   const upload = multer({ storage: storage });
 router.get('/' , showUsers)
 router.post('/' , saveUser)
+router.get('/email', getUserByEmail)
 router.get('/:id' , getUserByID) 
 router.delete('/:id',author, deleteUser)
 

@@ -693,3 +693,303 @@ const PORT = 3344;
 server.listen(PORT, () => {
   console.log(`Socket.IO server running on port ${PORT}`);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+const express = require('express')
+const mongoose = require('mongoose')
+let cors = require('cors')
+let env = require('dotenv')
+const app = express();
+const http = require('http');
+const { Server } = require("socket.io");
+
+env.config()
+
+app.use(cors({
+  origin: 'http://localhost:3000' // Replace with your client's URL
+}))
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your client's URL
+    methods: ["GET", "POST"]
+  }
+});
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  
+  // Join a conversation room
+  socket.on('joinConversation', (conversationId) => {
+    socket.join(conversationId);
+    console.log(`User joined conversation: ${conversationId}`);
+  });
+
+  // Handle new messages
+  socket.on('sendMessage', (message) => {
+    io.to(message.conversationId).emit('message', message);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+// ... (rest of your imports)
+
+mongoose.connect(`${process.env.MYDB}`).then(() => {
+  console.log("Connected to database successfully");
+}).catch((err) => {
+  console.log(err);
+})
+
+app.use(express.json())
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  let statusCode = err.statusCode ? err.statusCode : 500
+  res.status(statusCode).send({message: err.message})
+})
+
+// ... (rest of your routes)
+
+app.use('*', function(req, res, next) {
+  next({statusCode: 404, message: "Not found"})
+})
+
+const PORT = 3344;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Make io accessible to our router
+app.set('io', io);
+
+
+
+
+
+
+
+
+
+
+
+// ... existing code ...
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  
+  // Join a conversation room
+  socket.on('joinConversation', (conversationId) => {
+    socket.join(conversationId);
+    console.log(`User joined conversation: ${conversationId}`);
+  });
+
+  // We don't need this handler anymore as we're emitting from the server
+  // socket.on('sendMessage', (message) => {
+  //   io.to(message.conversationId).emit('message', message);
+  // });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+// ... rest of the code ...
+
+
+
+
+const messageModel = require('../models/messages');
+
+exports.sendMessage = async (req, res) => {
+  try {
+    console.log(req.body);
+    console.log("message");
+    const newMessage = req.body;
+
+    const savedMessage = await messageModel.create(newMessage);
+
+    const io = req.app.get('io');
+    io.to(savedMessage.conversationId.toString()).emit('message', savedMessage);
+    res.status(201).json(savedMessage);
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ message: 'Error sending message' });
+  }
+};
+
+// ... rest of the controller ...
+
+// ... existing code ...
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+  }
+});
+
+const connectedUsers = new Map();
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  
+  socket.on('userConnected', (userId) => {
+    connectedUsers.set(userId, socket.id);
+    console.log(`User ${userId} connected`);
+  });
+
+  socket.on('joinConversation', (conversationId) => {
+    socket.join(conversationId);
+    console.log(`User joined conversation: ${conversationId}`);
+  });
+
+  socket.on('disconnect', () => {
+    for (let [userId, socketId] of connectedUsers.entries()) {
+      if (socketId === socket.id) {
+        connectedUsers.delete(userId);
+        console.log(`User ${userId} disconnected`);
+        break;
+      }
+    }
+  });
+});
+
+// ... existing code ...
+
+// Make io and connectedUsers accessible to our router
+app.set('io', io);
+app.set('connectedUsers', connectedUsers);
+
+
+
+exports.sendMessage = async (req, res) => {
+  try {
+    const { conversationId, content } = req.body;
+    const senderId = req.user.id;
+
+    const savedMessage = await messageModel.create({
+      conversationId,
+      senderId,
+      content
+    });
+
+    const conversation = await Conversation.findByIdAndUpdate(
+      conversationId,
+      { lastMessage: savedMessage._id },
+      { new: true }
+    ).populate('projectId client freelancerId');
+
+    const io = req.app.get('io');
+    const connectedUsers = req.app.get('connectedUsers');
+
+    // Emit to conversation room
+    io.to(conversationId).emit('newMessage', savedMessage);
+
+    // Send notification to the other user
+    const recipientId = conversation.client.toString() === senderId 
+      ? conversation.freelancerId.toString()
+      : conversation.client.toString();
+
+    const recipientSocketId = connectedUsers.get(recipientId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit('messageNotification', {
+        conversationId: conversation._id,
+        projectTitle: conversation.projectId.title,
+        senderName: req.user.firstName,
+        senderAvatar: req.user.profilePicture,
+        message: savedMessage.content
+      });
+    }
+
+    res.status(201).json(savedMessage);
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending message' });
+  }
+};
+
+
+
+exports.sendMessage = async (req, res) => {
+  try {
+    const { conversationId, senderId, content } = req.body;
+    const newMessage = { conversationId, senderId, content };
+
+    const savedMessage = await messageModel.create(newMessage);
+
+    const conversation = await Conversation.findByIdAndUpdate(
+      conversationId,
+      { lastMessage: savedMessage._id },
+      { new: true }
+    ).populate('projectId client freelancerId');
+
+    const io = req.app.get('io');
+    const connectedUsers = req.app.get('connectedUsers');
+
+    // Emit to conversation room
+    io.to(conversationId).emit('newMessage', savedMessage);
+
+    // Send notification to the other user
+    const recipientId = conversation.client.toString() === senderId 
+      ? conversation.freelancerId.toString()
+      : conversation.client.toString();
+
+    const recipientSocketId = connectedUsers.get(recipientId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit('messageNotification', {
+        conversationId: conversation._id,
+        projectTitle: conversation.projectId.title,
+        senderName: savedMessage.senderId.firstName,
+        senderAvatar: savedMessage.senderId.profilePicture,
+        message: savedMessage.content
+      });
+    }
+
+    res.status(201).json(savedMessage);
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending message' });
+  }
+};
+
+
+
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  
+  socket.on('userConnected', (userId) => {
+    connectedUsers.set(userId, socket.id);
+    console.log(`User ${userId} connected`);
+  });
+
+  socket.on('joinConversation', (conversationId) => {
+    socket.join(conversationId);
+    console.log(`User joined conversation: ${conversationId}`);
+  });
+
+  socket.on('disconnect', () => {
+    for (let [userId, socketId] of connectedUsers.entries()) {
+      if (socketId === socket.id) {
+        connectedUsers.delete(userId);
+        console.log(`User ${userId} disconnected`);
+        break;
+      }
+    }
+  });
+});

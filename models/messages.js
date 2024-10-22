@@ -14,14 +14,15 @@ const MessageSchema = new mongoose.Schema({
     ref: 'user',
     required: true
   },
+  
   content: {
     type: String,
     required: true
   },
-  read: {
-    type: Boolean,
-    default: false
-  },
+  readBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user'
+  }],
   createdAt: {
     type: Date,
     default: Date.now

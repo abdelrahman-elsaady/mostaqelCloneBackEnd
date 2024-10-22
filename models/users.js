@@ -72,12 +72,8 @@ let usersSchema = mongoose.Schema({
         // required: true
         default:''
       },
-      averageRating: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 5
-      },
+      averageRating: { type: Number, default: 0 },
+
       reviews: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Review'
@@ -128,7 +124,7 @@ let usersSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Portfolio'
       }],
-      languages: {type: String, trim: true,default:"arabic"},
+      languages: {type: String, trim: true,},
       hourlyRate: {
         type: Number,
         min: 0
@@ -160,14 +156,20 @@ let usersSchema = mongoose.Schema({
       }
     }, { timestamps: true });
     
+
 usersSchema.pre('save',async function(next) {
-    let salt=await bcrypt.genSalt(10);
-    
-    let hashedPassword= await bcrypt.hash(this.password, salt)
-    
-    this.password=hashedPassword
-    
+  if (!this.password || !this.isModified('password')) {
+    return next();
+  }
+
+  try {
+    let salt = await bcrypt.genSalt(10);
+    let hashedPassword = await bcrypt.hash(this.password, salt);
+    this.password = hashedPassword;
     next();
+  } catch (error) {
+    next(error);
+  }
     })
 
 const userModel = mongoose.model('user',usersSchema)

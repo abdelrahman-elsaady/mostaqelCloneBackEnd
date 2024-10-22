@@ -12,6 +12,18 @@ let showUsers = async (req, res, next) => {
   }
 };
 
+let getUserByEmail = async (req, res, next) => {
+  let { email } = req.body;
+  console.log(email);
+  try{
+  let user = await userModel.findOne({ email: email });
+
+  res.status(200).json({ message: "success", user });
+} catch (err) {
+  next(err);
+}
+};
+
 let getUserByID = async (req, res, next) => {
   let { id } = req.params;
   // console.log("aboda");
@@ -38,6 +50,7 @@ let getUserByID = async (req, res, next) => {
 let saveUser = async (req, res) => {
 
   console.log("Asas");
+  console.log(req.body);
   try {
     let newUser = req.body;
 
@@ -48,9 +61,10 @@ let saveUser = async (req, res) => {
     }
     
     
-    await userModel.create(newUser);
-    res.status(200).json({ message: "user saved successfully" });
-    console.log(newUser); 
+       const user = await userModel.create(newUser);
+
+    res.status(200).json({ message: "user saved successfully" , user});
+    // console.log(newUser); 
 
   } catch (err) {
     console.log(err);
@@ -105,16 +119,20 @@ let Login = async (req, res) => {
   
   console.log(req.body);
   let { email, password } = req.body;
+  console.log(password);
   if (!email || !password) {
     return res
       .status(400)
       .json({ message: "Please provide email and password" });
   }
   let user = await userModel.findOne({ email: email });
+  // console.log(user);
   if (!user) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
   let isvalid = await bcrypt.compare(password, user.password);
+  console.log(isvalid);
+  
   if (!isvalid) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
@@ -124,9 +142,10 @@ let Login = async (req, res) => {
     { id: user._id, email: user.email, role: user.role },
     process.env.SECRET
   );
-
+console.log(token);
   res.status(200).json({token });
 };
+
 
 let updatePassword = async (req, res) => {
   console.log("ss");
@@ -167,4 +186,5 @@ module.exports = {
   updateUser,
   Login,
   updatePassword,
+  getUserByEmail
 };

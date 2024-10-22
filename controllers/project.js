@@ -39,6 +39,17 @@ let getProjects = async (req, res) => {
   }
 };
 
+let getProjectsByClient = async (req, res) => {
+  let { id } = req.params;
+  try {
+    const projects = await projectModel.find({ client: id }).populate('client').populate('category', 'name');
+    res.status(200).json(projects);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
 let saveProposal = async (req, res) => {
   console.log(req.params)
   // console.log(req.body)
@@ -141,4 +152,4 @@ let deleteProject = async (req, res) => {
 // }
 
 
-module.exports={createProject , getProjects  , getProjectById, updateProject , deleteProject, saveProposal  }
+module.exports={createProject , getProjects  , getProjectById, updateProject , deleteProject, saveProposal, getProjectsByClient   }

@@ -50,9 +50,11 @@ let showReviews = async(req,res)=>{
 
 let saveReviews = async(req , res)=>{
     let newCategories= req.body
+    console.log(newCategories)
     try{
         let savedUser = await reviewsModel.create(newCategories)
-        res.status(200).json({message:"categories saved successfully" , data : savedUser})
+        res.status(200).json({message:"reviews saved successfully" , data : savedUser})
+// console.log(res)
     }catch(err){
         res.status(404).json(err.message)
     }
