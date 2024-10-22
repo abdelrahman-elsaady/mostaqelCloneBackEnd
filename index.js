@@ -18,8 +18,9 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Replace with your client's URL
-    methods: ["GET", "POST"]
+    origin: "*", 
+    methods: "*",
+    
   }
 });
 const connectedUsers = new Map();
