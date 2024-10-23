@@ -1,5 +1,3 @@
-
-
 const messageModel = require('../models/messages');
 const Conversation = require('../models/conversation');
 
@@ -18,19 +16,19 @@ exports.sendMessage = async (req, res) => {
       { lastMessage: savedMessage._id },
       { new: true }
     ).populate('projectId client freelancerId');
-
-    const io = req.app.get('io');
     
-    // Emit to conversation room
-    io.to(conversationId).emit('newMessage', savedMessage);
+
+    const pusher = req.app.get('pusher');
+    
+    // Trigger event to conversation channel
+    pusher.trigger(`conversation-${conversationId}`, 'new-message', savedMessage);
 
     // Send notification to the other user
     const recipientId = conversation.client._id.toString() === senderId 
       ? conversation.freelancerId._id.toString()
       : conversation.client._id.toString();
 
-    console.log("Emitting messageNotification to:", recipientId);
-    io.to(recipientId).emit('messageNotification', {
+    pusher.trigger(`user-${recipientId}`, 'message-notification', {
       _id: savedMessage._id,
       conversationId: conversation._id,
       projectTitle: conversation.projectId.title,
@@ -44,6 +42,42 @@ exports.sendMessage = async (req, res) => {
     console.error('Error sending message:', error);
     res.status(500).json({ message: 'Error sending message' });
   }
+  // try {
+  //   const { conversationId, senderId, content } = req.body;
+  //   const newMessage = { conversationId, senderId, content };
+
+  //   const savedMessage = await messageModel.create(newMessage);
+
+  //   const conversation = await Conversation.findByIdAndUpdate(
+  //     conversationId,
+  //     { lastMessage: savedMessage._id },
+  //     { new: true }
+  //   ).populate('projectId client freelancerId');
+
+  //   const io = req.app.get('io');
+    
+  //   io.to(conversationId).emit('newMessage', savedMessage);
+
+  //   // Send notification to the other user
+  //   const recipientId = conversation.client._id.toString() === senderId 
+  //     ? conversation.freelancerId._id.toString()
+  //     : conversation.client._id.toString();
+
+  //   console.log("Emitting messageNotification to:", recipientId);
+  //   io.to(recipientId).emit('messageNotification', {
+  //     _id: savedMessage._id,
+  //     conversationId: conversation._id,
+  //     projectTitle: conversation.projectId.title,
+  //     senderName: conversation.client._id.toString() === senderId ? conversation.client.firstName : conversation.freelancerId.firstName,
+  //     senderAvatar: conversation.client._id.toString() === senderId ? conversation.client.profilePicture : conversation.freelancerId.profilePicture,
+  //     content: savedMessage.content
+  //   });
+
+  //   res.status(201).json(savedMessage);
+  // } catch (error) {
+  //   console.error('Error sending message:', error);
+  //   res.status(500).json({ message: 'Error sending message' });
+  // }
 };
 // exports.sendMessage = async (req, res) => {
 //   try {

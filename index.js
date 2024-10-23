@@ -5,41 +5,69 @@ let cors = require('cors')
 let env = require('dotenv')
 const app = express();
 const http = require('http');
-const { Server } = require("socket.io");
+env.config()
+// const { Server } = require("socket.io");
+const Pusher = require('pusher')
 
 app.use(cors({
   origin: '*'
 }))
 
 
+//pusher
 
-// const socketIo = require('socket.io');
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.PUSHER_CLUSTER,
+  useTLS: true
 
-
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:3000", "https://mostaqel-clone.vercel.app"],
-    methods: ["GET", "POST"],
-    credentials: true
-  }
 });
-const connectedUsers = new Map();
 
-io.on('connection', (socket) => {
-  console.log('A user connected');
+
+console.log('Pusher configuration:', {
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.PUSHER_CLUSTER
+});
+
+
+
+
+
+
+
+
+
+
+
+
+// const server = http.createServer(app);
+
+// const io = new Server(server, {
+//   cors: {
+//     origin: ["http://localhost:3000", "https://mostaqel-clone.vercel.app"],
+//     methods: ["GET", "POST"],
+//     credentials: true
+//   }
+// });
+// const connectedUsers = new Map();
+
+// io.on('connection', (socket) => {
+//   console.log('A user connected');
   
-  socket.on('userConnected', (userId) => {
-    connectedUsers.set(userId, socket.id);
-    socket.join(userId); 
-    console.log(`User ${userId} connected`);
-  });
+//   socket.on('userConnected', (userId) => {
+//     connectedUsers.set(userId, socket.id);
+//     socket.join(userId); 
+//     console.log(`User ${userId} connected`);
+//   });
 
-  socket.on('joinConversation', (conversationId) => {
-    socket.join(conversationId);
-    console.log(`User joined conversation: ${conversationId}`);
-  });
+//   socket.on('joinConversation', (conversationId) => {
+//     socket.join(conversationId);
+//     console.log(`User joined conversation: ${conversationId}`);
+//   });
 
 
   // io.on('connection', (socket) => {
@@ -54,22 +82,21 @@ io.on('connection', (socket) => {
 
 
 
-  socket.on('disconnect', () => {
-    for (let [userId, socketId] of connectedUsers.entries()) {
-      if (socketId === socket.id) {
-        connectedUsers.delete(userId);
-        console.log(`User ${userId} disconnected`);
-        break;
-      }
-    }
-  });
-});
+//   socket.on('disconnect', () => {
+//     for (let [userId, socketId] of connectedUsers.entries()) {
+//       if (socketId === socket.id) {
+//         connectedUsers.delete(userId);
+//         console.log(`User ${userId} disconnected`);
+//         break;
+//       }
+//     }
+//   });
+// });
 
 
 
 
 
-env.config()
 
 
 const userRouter = require('./routes/users')
@@ -146,10 +173,11 @@ app.use('*', function (req, res, next) {
 
 
 const PORT = process.env.PORT || 3344;
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
 // Make io accessible to our router
-app.set('io', io);
-app.set('connectedUsers', connectedUsers);
+// app.set('io', io);
+app.set('pusher', pusher);
+// app.set('connectedUsers', connectedUsers);
