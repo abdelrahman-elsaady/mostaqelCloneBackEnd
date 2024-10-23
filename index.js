@@ -11,6 +11,8 @@ app.use(cors({
   origin: '*'
 }))
 
+
+
 // const socketIo = require('socket.io');
 
 
@@ -135,6 +137,7 @@ app.use('/paypal', paypalRoutes);
 app.use('/',(req,res)=>{
   res.send("hello world")
 });
+
 app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
 })
@@ -142,7 +145,7 @@ app.use('*', function (req, res, next) {
 
 
 
-const PORT = process.env.MYPORT;
+const PORT = process.env.PORT || 3344;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

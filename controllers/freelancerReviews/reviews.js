@@ -12,8 +12,8 @@ exports.getFreelancerReviews = async (req, res) => {
     const freelancer = await User.findById(freelancerId).populate({
       path: 'reviews',
       populate: {
-        path: 'client project',
-        select: 'firstName lastName profilePicture title'
+        path: 'client project freelancer',
+        select: 'firstName lastName profilePicture title rating averageRating country createdAt'
       }
     });
 
@@ -49,7 +49,8 @@ exports.getFreelancerReviews = async (req, res) => {
     res.json({
       averageRating,
       ratingBreakdown,
-      reviews
+      reviews,
+      freelancer
     });
 
   } catch (error) {

@@ -51,7 +51,7 @@ let usersSchema = mongoose.Schema({
       },
   
       
-      jobTitle: { type: String, trim: true,default:'' },
+      // jobTitle: { type: String, trim: true,default:'' },
 
       profilePicture: {
         type: String,
