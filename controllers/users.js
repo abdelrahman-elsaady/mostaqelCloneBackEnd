@@ -21,7 +21,7 @@ const getUsersByRole = async (req, res) => {
     }
 
     const users = await userModel.find({ role: role });
-    res.json(users);
+    res.json({users});
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users', error: error.message });
   }
