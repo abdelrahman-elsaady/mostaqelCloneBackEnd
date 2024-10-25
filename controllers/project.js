@@ -41,6 +41,7 @@ let getProjects = async (req, res) => {
 
 let getProjectsByClient = async (req, res) => {
   let { id } = req.params;
+  console.log(id)
   try {
     const projects = await projectModel.find({ client: id }).populate('client').populate('category', 'name');
     res.status(200).json(projects);
