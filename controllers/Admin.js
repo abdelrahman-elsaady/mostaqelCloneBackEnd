@@ -11,7 +11,7 @@ let generateToken = (id) => {
 
 // Register a new admin
 let registerAdmin = async (req, res) => {
-  const { username, password, email } = req.body;
+  const {  password, email } = req.body;
   
 
   try {
@@ -22,7 +22,7 @@ let registerAdmin = async (req, res) => {
     }
 
     const admin = new Admin({
-      username,
+      
       password,
       email
     });
@@ -30,7 +30,7 @@ let registerAdmin = async (req, res) => {
     await admin.save();
     res.status(201).json({
       _id: admin._id,
-      username: admin.username,
+      // username: admin.username,
       email: admin.email,
       token: generateToken(admin._id)
     });
