@@ -12,6 +12,23 @@ let showUsers = async (req, res, next) => {
   }
 };
 
+const getUsersByRole = async (req, res) => {
+  try {
+    const { role } = req.query;
+    
+    if (!role || (role !== 'freelancer' && role !== 'client')) {
+      return res.status(400).json({ message: 'Invalid role specified. Use "freelancer" or "client".' });
+    }
+
+    const users = await userModel.find({ role: role });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching users', error: error.message });
+  }
+};
+
+
+
 let getUserByEmail = async (req, res, next) => {
   let { email } = req.body;
   console.log(email);
@@ -186,5 +203,6 @@ module.exports = {
   updateUser,
   Login,
   updatePassword,
-  getUserByEmail
+  getUserByEmail,
+  getUsersByRole,
 };

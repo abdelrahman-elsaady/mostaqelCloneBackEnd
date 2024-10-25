@@ -8,7 +8,14 @@ let {author,restrictTo}=require('../middlewares/authorization')
 router.post('/', createProject);
 
 router.get('/', getProjects);
+
+
+
+
+
 router.get('/client/:id', getProjectsByClient);
+
+
 router.post('/proposals/:id', saveProposal);
 
 router.patch('/:id', updateProject);

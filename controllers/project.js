@@ -30,7 +30,7 @@ let getProjects = async (req, res) => {
     .populate('client')
     .populate('category', 'name')
     .populate('skills')
-    .populate('proposals', 'freelancer amount deliveryTime proposal status')  
+    .populate('proposals', 'freelancer amount _id deliveryTime proposal status')  
     .sort({ createdAt: -1 });
 
     res.status(200).json(projects);
