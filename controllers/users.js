@@ -21,7 +21,12 @@ const getUsersByRole = async (req, res) => {
     }
 
     const users = await userModel.find({ role: role });
-    res.json({users});
+
+    if(role === 'client'){
+      res.json({clients:users});
+    }else{
+      res.json({freelancers:users});
+    }
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users', error: error.message });
   }
