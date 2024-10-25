@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 let {author,restrictTo}=require('../middlewares/authorization')
 
-const {getAdmins  , getAdminById , updateAdmin , deleteAdmin , registerAdmin , loginAdmin } = require('../controllers/Admin');
+const {getAdmins  , getAdminById , updateAdmin , deleteAdmin , addAdmin , loginAdmin } = require('../controllers/Admin');
 // const { protect } = require('../middleware/authMiddleware');
 // Register a new admin
-router.post('/register', registerAdmin);
+router.post('/register', addAdmin);
 
 // Login an admin
 router.post('/login',loginAdmin);

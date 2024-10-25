@@ -10,31 +10,40 @@ let generateToken = (id) => {
 };
 
 // Register a new admin
-let registerAdmin = async (req, res) => {
-  const {  password, email } = req.body;
-  
+const addAdmin = async (req, res) => {
+  const { password, email } = req.body;
 
   try {
-    const adminExists = await Admin.findOne({ email });
+    const adminExists = await adminModel.findOne({ email });
 
     if (adminExists) {
       return res.status(400).json({ error: 'Admin already exists' });
     }
 
-    const admin = new Admin({
-      
+    const admin = new adminModel({
       password,
       email
     });
 
+    console.log(admin);
+
     await admin.save();
-    res.status(201).json({
+
+    let responseData = {
       _id: admin._id,
-      // username: admin.username,
       email: admin.email,
-      token: generateToken(admin._id)
-    });
+    };
+
+    try {
+      responseData.token = generateToken(admin._id);
+    } catch (tokenError) {
+      console.error('Error generating token:', tokenError);
+      // Token generation failed, but admin was still created
+    }
+
+    res.status(201).json(responseData);
   } catch (err) {
+    console.error('Error adding admin:', err);
     res.status(400).json({ error: err.message });
   }
 };
@@ -126,4 +135,4 @@ let deleteAdmin = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-module.exports={getAdmins  , getAdminById , updateAdmin , deleteAdmin , registerAdmin , loginAdmin }
+module.exports={getAdmins  , getAdminById , updateAdmin , deleteAdmin , addAdmin , loginAdmin }
