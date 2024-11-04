@@ -8,7 +8,7 @@ exports.sendMessage = async (req, res) => {
   try {
     const { conversationId, senderId, content } = req.body;
 
-    // Find conversation first
+    // Find conversation and populate necessary fields
     const conversation = await Conversation.findById(conversationId)
       .populate('client')
       .populate('freelancerId')
@@ -18,17 +18,20 @@ exports.sendMessage = async (req, res) => {
       return res.status(404).json({ message: 'Conversation not found' });
     }
 
-    // Create the message
+    // Create new message
     const newMessage = await messageModel.create({
       conversationId,
       senderId,
       content,
-      readBy: [senderId] // Mark as read by sender
+      readBy: [senderId]
     });
 
     // Populate the message with sender details
     const populatedMessage = await messageModel.findById(newMessage._id)
-      .populate('senderId', 'firstName lastName profilePicture');
+      .populate({
+        path: 'senderId',
+        select: '_id firstName lastName profilePicture'
+      });
 
     // Update conversation's last message
     await Conversation.findByIdAndUpdate(
@@ -38,36 +41,50 @@ exports.sendMessage = async (req, res) => {
     );
 
     const pusher = req.app.get('pusher');
-    
-    // Broadcast the new message to the conversation channel
-    console.log('Broadcasting to channel:', `conversation-${conversationId}`);
-    pusher.trigger(`conversation-${conversationId}`, 'new-message', populatedMessage);
 
-    // Determine recipient for notification
+    // Debug log
+    console.log('Triggering Pusher event for conversation:', conversationId);
+
+    // Broadcast message to conversation channel
+    await pusher.trigger(
+      `conversation-${conversationId}`,
+      'new-message',
+      {
+        _id: populatedMessage._id,
+        content: populatedMessage.content,
+        senderId: populatedMessage.senderId,
+        conversationId: populatedMessage.conversationId,
+        createdAt: populatedMessage.createdAt,
+        readBy: populatedMessage.readBy
+      }
+    );
+
+    // Send notification to recipient
     const recipientId = conversation.client._id.toString() === senderId 
       ? conversation.freelancerId._id.toString()
       : conversation.client._id.toString();
 
-    const sender = conversation.client._id.toString() === senderId 
-      ? conversation.client 
-      : conversation.freelancerId;
+    await pusher.trigger(
+      `user-${recipientId}`,
+      'message-notification',
+      {
+        _id: populatedMessage._id,
+        conversationId: conversation._id,
+        projectTitle: conversation.projectId.title,
+        senderName: populatedMessage.senderId.firstName,
+        senderAvatar: populatedMessage.senderId.profilePicture,
+        content: populatedMessage.content,
+        createdAt: populatedMessage.createdAt
+      }
+    );
 
-    // Send notification to recipient
-    console.log('Sending notification to:', `user-${recipientId}`);
-    pusher.trigger(`user-${recipientId}`, 'message-notification', {
-      _id: newMessage._id,
-      conversationId: conversation._id,
-      projectTitle: conversation.projectId.title,
-      senderName: sender.firstName,
-      senderAvatar: sender.profilePicture,
-      content: newMessage.content,
-      createdAt: newMessage.createdAt
-    });
+    // Debug log
+    console.log('Message sent and broadcasted successfully');
 
     res.status(201).json(populatedMessage);
   } catch (error) {
-    console.error('Error sending message:', error);
-    res.status(500).json({ message: 'Error sending message' });
+    console.error('Error in sendMessage:', error);
+    res.status(500).json({ message: 'Error sending message', error: error.message });
   }
 };
 
