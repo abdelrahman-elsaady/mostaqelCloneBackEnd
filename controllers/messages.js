@@ -24,13 +24,17 @@ exports.sendMessage = async (req, res) => {
     pusher.trigger(`conversation-${conversationId}`, 'new-message', populatedMessage);
 
     // Determine recipient and send notification
-    const recipientId = conversation.client._id.toString() === senderId 
+    const recipientId = conversation.client._id.toString() == senderId 
       ? conversation.freelancerId._id.toString()
       : conversation.client._id.toString();
 
-    const sender = conversation.client._id.toString() === senderId 
+
+
+    const sender = conversation.client._id.toString() == senderId 
       ? conversation.client 
       : conversation.freelancerId;
+
+      if(recipientId != senderId){
 
     pusher.trigger(`user-${recipientId}`, 'message-notification', {
       _id: savedMessage._id,
@@ -39,8 +43,20 @@ exports.sendMessage = async (req, res) => {
       senderName: sender.firstName,
       senderAvatar: sender.profilePicture,
       content: savedMessage.content,
-      createdAt: savedMessage.createdAt
-    });
+        createdAt: savedMessage.createdAt
+      });
+    }else{
+        
+    pusher.trigger(`user-${senderId}`, 'message-notification', {
+      _id: savedMessage._id,
+      conversationId: conversation._id,
+      projectTitle: conversation.projectId.title,
+      senderName: sender.firstName,
+      senderAvatar: sender.profilePicture,
+      content: savedMessage.content,
+        createdAt: savedMessage.createdAt
+      });
+    }
 
     res.status(201).json(populatedMessage);
   } catch (error) {
