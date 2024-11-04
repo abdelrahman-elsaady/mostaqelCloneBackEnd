@@ -18,10 +18,10 @@ exports.sendMessage = async (req, res) => {
     ).populate('projectId client freelancerId');
     
     const ably = req.app.get('ably');
-    const channel = ably.channels.get(`conversation-${conversationId}`);
     
-    // Publish message to conversation channel
-    await channel.publish('new-message', {
+    // Publish to conversation channel
+    const conversationChannel = ably.channels.get(`conversation-${conversationId}`);
+    await conversationChannel.publish('new-message', {
       _id: savedMessage._id,
       content: savedMessage.content,
       senderId: savedMessage.senderId,

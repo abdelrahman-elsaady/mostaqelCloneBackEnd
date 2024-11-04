@@ -7,7 +7,7 @@ const User = require('../models/users');
 
 router.post('/transfer', async (req, res) => {
   const { senderId, receiverId, amount } = req.body;
- console.log(senderId, receiverId, amount);
+  
   try {
     const sender = await User.findById(senderId);
     const receiver = await User.findById(receiverId);
@@ -22,18 +22,15 @@ router.post('/transfer', async (req, res) => {
     await sender.save();
     await receiver.save();
 
-    // Emit socket event
-    const io = req.app.get('io');
-    const connectedUsers = req.app.get('connectedUsers');
-    const receiverSocketId = connectedUsers.get(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('moneyReceived', { 
-        senderId: sender._id, 
-        senderName: sender.firstName + ' ' + sender.lastName,
-        senderAvatar: sender.profilePicture,
-        amount 
-      });
-    }
+    // Send notification using Ably
+    const ably = req.app.get('ably');
+    const userChannel = ably.channels.get(`user-${receiverId}`);
+    await userChannel.publish('money-received', {
+      senderId: sender._id,
+      senderName: sender.firstName + ' ' + sender.lastName,
+      senderAvatar: sender.profilePicture,
+      amount
+    });
 
     res.status(200).json({ message: 'Transfer successful' });
   } catch (error) {
