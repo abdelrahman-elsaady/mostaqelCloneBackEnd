@@ -30,10 +30,9 @@ exports.sendMessage = async (req, res) => {
     });
 
     // Send notification to recipient
-    const recipientId = conversation.client._id.toString() != senderId 
-      ? conversation.client._id.toString() 
-      : conversation.freelancerId._id.toString();
-
+    let recipientId = conversation.client._id.toString() === senderId 
+    ? conversation.freelancerId._id.toString()  // if sender is client, send to freelancer
+    : conversation.client._id.toString();  
 
     const userChannel = ably.channels.get(`user-${recipientId}`);
     await userChannel.publish('message-notification', {
