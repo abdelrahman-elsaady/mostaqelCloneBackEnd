@@ -34,7 +34,7 @@ exports.sendMessage = async (req, res) => {
       ? conversation.client 
       : conversation.freelancerId;
 
-      if(recipientId != senderId){
+      // if(recipientId != senderId){
 
     pusher.trigger(`user-${recipientId}`, 'message-notification', {
       _id: savedMessage._id,
@@ -45,7 +45,7 @@ exports.sendMessage = async (req, res) => {
       content: savedMessage.content,
         createdAt: savedMessage.createdAt
       });
-    }else{
+    
         
     pusher.trigger(`user-${senderId}`, 'message-notification', {
       _id: savedMessage._id,
@@ -56,7 +56,7 @@ exports.sendMessage = async (req, res) => {
       content: savedMessage.content,
         createdAt: savedMessage.createdAt
       });
-    }
+    
 
     res.status(201).json(populatedMessage);
   } catch (error) {
