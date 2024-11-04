@@ -9,6 +9,7 @@ env.config()
 // const { Server } = require("socket.io");
 const Pusher = require('pusher')
 const Ably = require('ably');
+const path = require('path');
 
 // Remove Pusher configuration
 // Add Ably configuration
@@ -202,7 +203,7 @@ app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
 })
 
-app.use('/static', express.static('static'));
+app.use('/static', express.static(path.join(__dirname, 'static')));
 
 
 
