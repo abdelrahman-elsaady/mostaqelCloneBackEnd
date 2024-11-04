@@ -115,8 +115,9 @@ let deleteUser = async (req, res) => {
 let updateUser = async (req, res, next) => {
   console.log("aboda");
   try {
+    console.log(req.body);
     let updates = req.body;
-    console.log(updates);
+    // console.log(updates);
     if (req.file) {
       updates.profilePicture = req.file.filename;
     }
@@ -125,7 +126,10 @@ let updateUser = async (req, res, next) => {
     if (updates.skills) {
       updates.skills = JSON.parse(updates.skills);
     }
+
     let user = await userModel.findByIdAndUpdate(req.params.id, updates, { new: true });
+    console.log(user);
+    
     res.status(200).json({ message: "User was edited successfully", user: user });
 } catch (err) {
 

@@ -96,6 +96,25 @@ console.log('Pusher configuration:', {
 // });
 
 
+// io.on('connection', (socket) => {
+//   console.log('A user connected');
+  
+  //Join a conversation room
+
+  // socket.on('joinConversation', (conversationId) => {
+  //   socket.join(conversationId);
+  //   console.log(`User joined conversation: ${conversationId}`);
+  // });
+
+  // We don't need this handler anymore as we're emitting from the server
+  // socket.on('sendMessage', (message) => {
+  //   io.to(message.conversationId).emit('message', message);
+  // });
+
+//   socket.on('disconnect', () => {
+//     console.log('User disconnected');
+//   });
+// });
 
 
 
