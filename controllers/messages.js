@@ -7,75 +7,50 @@ const Conversation = require('../models/conversation');
 exports.sendMessage = async (req, res) => {
   try {
     const { conversationId, senderId, content } = req.body;
-    
-    // Create and save the new message
-    const newMessage = await messageModel.create({
-      conversationId,
-      senderId,
-      content,
-      readBy: [senderId] // Mark as read by sender
-    });
+    const newMessage = { conversationId, senderId, content };
 
-    // Get conversation with populated fields
+    const savedMessage = await messageModel.create(newMessage);
+
     const conversation = await Conversation.findByIdAndUpdate(
       conversationId,
-      { lastMessage: newMessage._id },
+      { lastMessage: savedMessage._id },
       { new: true }
-    )
-    .populate('client', 'firstName lastName profilePicture')
-    .populate('freelancerId', 'firstName lastName profilePicture')
-    .populate('projectId', 'title');
-
-    if (!conversation) {
-      throw new Error('Conversation not found');
-    }
-
+    ).populate('projectId client freelancerId');
+    
     const ably = req.app.get('ably');
+    
+    // Publish to conversation channel
+    const conversationChannel = ably.channels.get(`conversation-${conversationId}`);
+    await conversationChannel.publish('new-message', {
+      _id: savedMessage._id,
+      content: savedMessage.content,
+      senderId: savedMessage.senderId,
+      createdAt: savedMessage.createdAt,
+      readBy: savedMessage.readBy
+    });
 
-    // Determine recipient ID and sender details
+    // Send notification to recipient
     const recipientId = conversation.client._id.toString() === senderId 
       ? conversation.freelancerId._id.toString()
       : conversation.client._id.toString();
 
-    const sender = conversation.client._id.toString() === senderId 
-      ? conversation.client 
-      : conversation.freelancerId;
-
-    // Prepare notification data
-    const notificationData = {
-      _id: newMessage._id,
+    const userChannel = ably.channels.get(`user-${recipientId}`);
+    await userChannel.publish('message-notification', {
+      _id: savedMessage._id,
       conversationId: conversation._id,
       projectTitle: conversation.projectId.title,
-      senderName: `${sender.firstName} ${sender.lastName}`,
-      senderAvatar: sender.profilePicture,
-      content: newMessage.content,
-      timestamp: newMessage.createdAt
-    };
-
-    // Send notification to recipient's channel
-    const recipientChannel = ably.channels.get(`user-${recipientId}`);
-    
-    try {
-      await recipientChannel.publish('message-notification', notificationData);
-      console.log(`Notification sent to user-${recipientId}`);
-    } catch (error) {
-      console.error('Error publishing notification:', error);
-    }
-
-    res.status(201).json({
-      success: true,
-      message: newMessage,
-      notificationSent: true
+      senderName: conversation.client._id.toString() === senderId ? conversation.client.firstName : conversation.freelancerId.firstName,
+      senderAvatar: conversation.client._id.toString() === senderId ? conversation.client.profilePicture : conversation.freelancerId.profilePicture,
+      content: savedMessage.content
     });
 
+    res.status(201).json(savedMessage);
   } catch (error) {
-    console.error('Error in sendMessage:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message || 'Error sending message'
-    });
+    console.error('Error sending message:', error);
+    res.status(500).json({ message: 'Error sending message' });
   }
 };
+
 
 
 
