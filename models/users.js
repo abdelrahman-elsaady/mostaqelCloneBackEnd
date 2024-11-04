@@ -54,11 +54,11 @@ let usersSchema = mongoose.Schema({
 
         url: {
         type: String,
-          default: 'https://th.bing.com/th/id/OIP.yYH0Z8hoEboWVtgM6i0xeQHaEK?rs=1&pid=ImgDetMain'  // Path to your default image
+          default: '/static/users/avatar.png'  // Path to your default image
     },
     data: {
         type: String,
-        default: 'https://th.bing.com/th/id/OIP.yYH0Z8hoEboWVtgM6i0xeQHaEK?rs=1&pid=ImgDetMain'  // Your default image in base64
+        default: '/static/users/avatar.png'  // Your default image in base64
     }
       },
      

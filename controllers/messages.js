@@ -54,8 +54,8 @@ exports.sendMessage = async (req, res) => {
         : conversation.freelancerId.firstName,
       // Use the URL for notifications (smaller payload)
       senderAvatar: conversation.client._id.toString() === senderId 
-        ? conversation.client.profilePicture?.url
-        : conversation.freelancerId.profilePicture?.url,
+        ? conversation.client.profilePicture
+        : conversation.freelancerId.profilePicture,
       content: savedMessage.content
     });
 
