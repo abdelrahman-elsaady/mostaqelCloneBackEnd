@@ -204,7 +204,12 @@ app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
 })
 
-app.use('/static', express.static('./static'));
+app.use('/static', express.static(path.join(__dirname, 'static')));
+
+app.use('/static', (req, res, next) => {
+    console.log('Static file requested:', req.url);
+    next();
+});
 
 app.use('/static/users', (req, res, next) => {
     // If requested image doesn't exist, serve default avatar
@@ -215,8 +220,14 @@ app.use('/static/users', (req, res, next) => {
     next();
 });
 
-
-
+app.use('/static/users/*', (req, res, next) => {
+    const filePath = path.join(__dirname, req.url);
+    if (!fs.existsSync(filePath)) {
+        // If requested image doesn't exist, serve default
+        return res.sendFile(path.join(__dirname, 'static/users/avatar.png'));
+    }
+    next();
+});
 
 const PORT = process.env.PORT || 3344;
 app.listen(PORT, () => {
