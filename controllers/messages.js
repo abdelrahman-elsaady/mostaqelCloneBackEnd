@@ -15,11 +15,15 @@ exports.sendMessage = async (req, res) => {
       .populate('senderId');
 
     // Update conversation's last message
-    await Conversation.findByIdAndUpdate(
-      conversationId,
-      { lastMessage: savedMessage._id },
-      { new: true }
-    );
+    const conversation = await Conversation.findById(conversationId)
+      .populate('client')
+      .populate('freelancerId')
+      .populate('projectId');
+
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation not found' });
+    }
+
 
     const pusher = req.app.get('pusher');
     
@@ -49,16 +53,7 @@ exports.sendMessage = async (req, res) => {
         createdAt: savedMessage.createdAt
       });
     
-        
-    // pusher.trigger(`user-${senderId}`, 'message-notification', {
-    //   _id: savedMessage._id,
-    //   conversationId: conversation._id,
-    //   projectTitle: conversation.projectId.title,
-    //   senderName: sender.firstName,
-    //   senderAvatar: sender.profilePicture,
-    //   content: savedMessage.content,
-    //     createdAt: savedMessage.createdAt
-    //   });
+    
     
 
     res.status(201).json(populatedMessage);
