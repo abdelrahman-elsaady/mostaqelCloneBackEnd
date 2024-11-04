@@ -30,7 +30,7 @@ exports.sendMessage = async (req, res) => {
     });
 
     // Send notification to recipient
-    const recipientId = conversation.client._id.toString() === senderId 
+    const recipientId = conversation.client._id.toString() != senderId 
       ? conversation.freelancerId._id.toString()
       : conversation.client._id.toString();
 
