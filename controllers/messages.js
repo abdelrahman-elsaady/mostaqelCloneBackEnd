@@ -7,55 +7,37 @@ const Conversation = require('../models/conversation');
 exports.sendMessage = async (req, res) => {
   try {
     const { conversationId, senderId, content } = req.body;
-    
-    // Create new message
-    const newMessage = await messageModel.create({
-      conversationId,
-      senderId,
-      content,
-      readBy: [senderId]
-    });
+    const newMessage = { conversationId, senderId, content };
 
-    // Populate sender details
-    const populatedMessage = await messageModel.findById(newMessage._id)
-      .populate('senderId', 'firstName lastName profilePicture');
+    const savedMessage = await messageModel.create(newMessage);
 
-    // Update conversation's last message
     const conversation = await Conversation.findByIdAndUpdate(
       conversationId,
-      { lastMessage: newMessage._id },
+      { lastMessage: savedMessage._id },
       { new: true }
     ).populate('projectId client freelancerId');
-
-    // Format message for Pusher
-    const messageForPusher = {
-      _id: populatedMessage._id,
-      content: populatedMessage.content,
-      senderId: populatedMessage.senderId._id, // Just send the ID
-      createdAt: populatedMessage.createdAt,
-      readBy: populatedMessage.readBy
-    };
+    
 
     const pusher = req.app.get('pusher');
     
-    // Trigger new message event
-    pusher.trigger(
-      `conversation-${conversationId}`,
-      'new-message',
-      messageForPusher
-    );
+    // Trigger event to conversation channel
+    pusher.trigger(`conversation-${conversationId}`, 'new-message', savedMessage);
 
-    // Send notification to recipient
+    // Send notification to the other user
     const recipientId = conversation.client._id.toString() === senderId 
       ? conversation.freelancerId._id.toString()
       : conversation.client._id.toString();
 
     pusher.trigger(`user-${recipientId}`, 'message-notification', {
+      _id: savedMessage._id,
       conversationId: conversation._id,
-      message: messageForPusher
+      projectTitle: conversation.projectId.title,
+      senderName: conversation.client._id.toString() === senderId ? conversation.client.firstName : conversation.freelancerId.firstName,
+      senderAvatar: conversation.client._id.toString() === senderId ? conversation.client.profilePicture : conversation.freelancerId.profilePicture,
+      content: savedMessage.content
     });
 
-    res.status(201).json(populatedMessage);
+    res.status(201).json(savedMessage);
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({ message: 'Error sending message' });
