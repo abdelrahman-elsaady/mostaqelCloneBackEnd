@@ -7,12 +7,7 @@ const Conversation = require('../models/conversation');
 exports.sendMessage = async (req, res) => {
   try {
     const { conversationId, senderId, content } = req.body;
-    const newMessage = { 
-      conversationId, 
-      senderId, 
-      content,
-      readBy: [senderId]
-    };
+    const newMessage = { conversationId, senderId, content };
 
     const savedMessage = await messageModel.create(newMessage);
 
@@ -21,20 +16,33 @@ exports.sendMessage = async (req, res) => {
       { lastMessage: savedMessage._id },
       { new: true }
     ).populate('projectId client freelancerId');
-
-    // Format message for Pusher to match client-side structure
-    const messageForPusher = {
+    
+    const ably = req.app.get('ably');
+    const channel = ably.channels.get(`conversation-${conversationId}`);
+    
+    // Publish message to conversation channel
+    await channel.publish('new-message', {
       _id: savedMessage._id,
       content: savedMessage.content,
       senderId: savedMessage.senderId,
       createdAt: savedMessage.createdAt,
       readBy: savedMessage.readBy
-    };
+    });
 
-    const pusher = req.app.get('pusher');
-    
-    // Trigger event to conversation channel
-    pusher.trigger(`conversation-${conversationId}`, 'new-message', messageForPusher);
+    // Send notification to recipient
+    const recipientId = conversation.client._id.toString() === senderId 
+      ? conversation.freelancerId._id.toString()
+      : conversation.client._id.toString();
+
+    const userChannel = ably.channels.get(`user-${recipientId}`);
+    await userChannel.publish('message-notification', {
+      _id: savedMessage._id,
+      conversationId: conversation._id,
+      projectTitle: conversation.projectId.title,
+      senderName: conversation.client._id.toString() === senderId ? conversation.client.firstName : conversation.freelancerId.firstName,
+      senderAvatar: conversation.client._id.toString() === senderId ? conversation.client.profilePicture : conversation.freelancerId.profilePicture,
+      content: savedMessage.content
+    });
 
     res.status(201).json(savedMessage);
   } catch (error) {

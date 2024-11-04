@@ -8,7 +8,19 @@ const http = require('http');
 env.config()
 // const { Server } = require("socket.io");
 const Pusher = require('pusher')
+const Ably = require('ably');
 
+// Remove Pusher configuration
+// Add Ably configuration
+const ably = new Ably.Rest(process.env.ABLY_API_KEY);
+
+// Make ably accessible to routes
+app.set('ably', ably);
+
+// Add environment variable check
+console.log('Ably configuration:', {
+  apiKey: process.env.ABLY_API_KEY ? 'Set' : 'Not set'
+});
 
 
 app.use(cors({
