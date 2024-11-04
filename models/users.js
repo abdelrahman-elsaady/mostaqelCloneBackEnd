@@ -51,15 +51,8 @@ let usersSchema = mongoose.Schema({
       },
   
       profilePicture: {
-
-        url: {
         type: String,
-          default: '/static/users/avatar.png'  // Path to your default image
-    },
-    data: {
-        type: String,
-        default: '/static/users/avatar.png'  // Your default image in base64
-    }
+        default: '/static/users/avatar.png'
       },
      
       bio: { type: String, trim: true,default:'' },
