@@ -10,20 +10,24 @@ exports.sendMessage = async (req, res) => {
     const newMessage = { conversationId, senderId, content };
 
     const savedMessage = await messageModel.create(newMessage);
-    const populatedMessage = await messageModel.findById(savedMessage._id).populate('senderId');
+    const populatedMessage = await messageModel.findById(savedMessage._id)
+      .populate('senderId', 'firstName lastName profilePicture');
 
     const conversation = await Conversation.findByIdAndUpdate(
       conversationId,
       { lastMessage: savedMessage._id },
       { new: true }
-    ).populate('projectId client freelancerId');
+    )
+    .populate('projectId', 'title')
+    .populate('client', 'firstName lastName profilePicture')
+    .populate('freelancerId', 'firstName lastName profilePicture');
 
     const pusher = req.app.get('pusher');
     
     // Send the populated message to the conversation channel
     pusher.trigger(`conversation-${conversationId}`, 'new-message', populatedMessage);
 
-    // Determine recipient and send notification
+    // Determine recipient
     const recipientId = conversation.client._id.toString() === senderId 
       ? conversation.freelancerId._id.toString()
       : conversation.client._id.toString();
@@ -32,15 +36,27 @@ exports.sendMessage = async (req, res) => {
       ? conversation.client 
       : conversation.freelancerId;
 
-    pusher.trigger(`user-${recipientId}`, 'message-notification', {
+    // Create notification payload
+    const notificationPayload = {
       _id: savedMessage._id,
       conversationId: conversation._id,
       projectTitle: conversation.projectId.title,
-      senderName: sender.firstName,
+      senderName: `${sender.firstName} ${sender.lastName}`,
       senderAvatar: sender.profilePicture,
       content: savedMessage.content,
-      createdAt: savedMessage.createdAt
-    });
+      createdAt: savedMessage.createdAt,
+      readBy: []
+    };
+
+    // Log the notification being sent
+    console.log(`Sending notification to user-${recipientId}:`, notificationPayload);
+
+    // Trigger the notification
+    await pusher.trigger(
+      `user-${recipientId}`,
+      'message-notification',
+      notificationPayload
+    );
 
     res.status(201).json(populatedMessage);
   } catch (error) {
@@ -48,7 +64,6 @@ exports.sendMessage = async (req, res) => {
     res.status(500).json({ message: 'Error sending message' });
   }
 };
-
 
 exports.getMessages = async (req, res) => {
   try {
