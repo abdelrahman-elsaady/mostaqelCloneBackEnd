@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const userModel = require('../models/users');
 const sharp = require('sharp');
+const fs = require('fs');
 
 let {author,restrictTo}=require('../middlewares/authorization')
 
@@ -11,6 +12,12 @@ let {saveUser , showUsers , getUserByID , deleteUser , updateUser ,  Login ,upda
 // Configure multer for file upload
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+// Add this before your routes
+const staticDir = path.join(__dirname, '../static/users');
+if (!fs.existsSync(staticDir)) {
+    fs.mkdirSync(staticDir, { recursive: true });
+}
 
 router.get('/role', getUsersByRole);
 
@@ -27,31 +34,29 @@ router.patch ('/updatePassword',author,updatePassword)
 router.patch('/:id', upload.single('profilePicture'), async (req, res) => {
     try {
         if (req.file) {
-            // Resize and compress image
+            // Handle new image upload
             const optimizedImageBuffer = await sharp(req.file.buffer)
-                .resize(200, 200, { // Resize to reasonable profile picture size
+                .resize(200, 200, {
                     fit: 'cover',
                     position: 'center'
                 })
-                .jpeg({ quality: 80 }) // Convert to JPEG with 80% quality
+                .jpeg({ quality: 80 })
                 .toBuffer();
 
-            // Convert to base64 for database storage
-            const optimizedBase64 = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
-
-            // Generate filename and save physical file
             const filename = `${Date.now()}-${req.file.originalname}`;
+            
+            // Save physical file
             await sharp(optimizedImageBuffer)
-                .toFile(path.join('./static/users', filename));
+                .toFile(path.join(__dirname, '../static/users', filename));
 
-            // Save both URL and optimized base64 to database
+            // Save to database
             req.body.profilePicture = {
                 url: `/static/users/${filename}`,
-                data: optimizedBase64
+                data: `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`
             };
         }
 
-        // Update user logic...
+        // Update user
         const user = await userModel.findByIdAndUpdate(
             req.params.id,
             req.body,
@@ -61,7 +66,7 @@ router.patch('/:id', upload.single('profilePicture'), async (req, res) => {
         res.json(user);
     } catch (error) {
         console.error('Error processing image:', error);
-        res.status(500).json({ message: 'Error updating user' });
+        res.status(500).json({ message: 'Error updating user', error: error.message });
     }
 });
 

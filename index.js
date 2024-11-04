@@ -10,6 +10,7 @@ env.config()
 const Pusher = require('pusher')
 const Ably = require('ably');
 const path = require('path');
+const fs = require('fs');
 
 // Remove Pusher configuration
 // Add Ably configuration
@@ -204,6 +205,15 @@ app.use('*', function (req, res, next) {
 })
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
+
+app.use('/static/users', (req, res, next) => {
+    // If requested image doesn't exist, serve default avatar
+    const requestedPath = path.join(__dirname, 'static/users', req.path);
+    if (!fs.existsSync(requestedPath)) {
+        return res.sendFile(path.join(__dirname, 'static/users/avatar.png'));
+    }
+    next();
+});
 
 
 
