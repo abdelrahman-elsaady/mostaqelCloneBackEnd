@@ -204,7 +204,7 @@ app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
 })
 
-app.use('/static', express.static(path.join(__dirname, 'static')));
+app.use('/static', express.static('./static'));
 
 app.use('/static/users', (req, res, next) => {
     // If requested image doesn't exist, serve default avatar
