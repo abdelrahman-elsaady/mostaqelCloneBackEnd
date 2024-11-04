@@ -7,7 +7,12 @@ const Conversation = require('../models/conversation');
 exports.sendMessage = async (req, res) => {
   try {
     const { conversationId, senderId, content } = req.body;
-    const newMessage = { conversationId, senderId, content };
+    const newMessage = { 
+      conversationId, 
+      senderId, 
+      content,
+      readBy: [senderId]
+    };
 
     const savedMessage = await messageModel.create(newMessage);
 
@@ -16,26 +21,20 @@ exports.sendMessage = async (req, res) => {
       { lastMessage: savedMessage._id },
       { new: true }
     ).populate('projectId client freelancerId');
-    
+
+    // Format message for Pusher to match client-side structure
+    const messageForPusher = {
+      _id: savedMessage._id,
+      content: savedMessage.content,
+      senderId: savedMessage.senderId,
+      createdAt: savedMessage.createdAt,
+      readBy: savedMessage.readBy
+    };
 
     const pusher = req.app.get('pusher');
     
     // Trigger event to conversation channel
-    pusher.trigger(`conversation-${conversationId}`, 'new-message', savedMessage);
-
-    // Send notification to the other user
-    const recipientId = conversation.client._id.toString() === senderId 
-      ? conversation.freelancerId._id.toString()
-      : conversation.client._id.toString();
-
-    pusher.trigger(`user-${recipientId}`, 'message-notification', {
-      _id: savedMessage._id,
-      conversationId: conversation._id,
-      projectTitle: conversation.projectId.title,
-      senderName: conversation.client._id.toString() === senderId ? conversation.client.firstName : conversation.freelancerId.firstName,
-      senderAvatar: conversation.client._id.toString() === senderId ? conversation.client.profilePicture : conversation.freelancerId.profilePicture,
-      content: savedMessage.content
-    });
+    pusher.trigger(`conversation-${conversationId}`, 'new-message', messageForPusher);
 
     res.status(201).json(savedMessage);
   } catch (error) {
@@ -43,6 +42,14 @@ exports.sendMessage = async (req, res) => {
     res.status(500).json({ message: 'Error sending message' });
   }
 };
+
+
+
+
+
+
+
+
 exports.getMessages = async (req, res) => {
   try {
     console.log("getMessages");
