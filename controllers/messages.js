@@ -9,18 +9,21 @@ exports.sendMessage = async (req, res) => {
     const { conversationId, senderId, content } = req.body;
     const newMessage = { conversationId, senderId, content };
 
+    // Create and populate the message
     const savedMessage = await messageModel.create(newMessage);
-    const populatedMessage = await messageModel.findById(savedMessage._id).populate('senderId');
+    const populatedMessage = await messageModel.findById(savedMessage._id)
+      .populate('senderId');
 
-    const conversation = await Conversation.findByIdAndUpdate(
+    // Update conversation's last message
+    await Conversation.findByIdAndUpdate(
       conversationId,
       { lastMessage: savedMessage._id },
       { new: true }
-    ).populate('projectId client freelancerId');
+    );
 
     const pusher = req.app.get('pusher');
     
-    // Send the populated message to the conversation channel
+    // Broadcast the new message to all users in the conversation
     pusher.trigger(`conversation-${conversationId}`, 'new-message', populatedMessage);
 
     // Determine recipient and send notification
