@@ -19,7 +19,7 @@ exports.sendMessage = async (req, res) => {
     
     const ably = req.app.get('ably');
     
-    // Publish to conversation channel
+    // Publish to conversation channel with minimal data
     const conversationChannel = ably.channels.get(`conversation-${conversationId}`);
     await conversationChannel.publish('new-message', {
       _id: savedMessage._id,
@@ -29,18 +29,33 @@ exports.sendMessage = async (req, res) => {
       readBy: savedMessage.readBy
     });
 
-    // Send notification to recipient
+    // Add debug logs
+    console.log('Sender ID:', senderId);
+    console.log('Client ID:', conversation.client._id.toString());
+    console.log('Freelancer ID:', conversation.freelancerId._id.toString());
+    
     let recipientId = conversation.client._id.toString() === senderId 
-    ? conversation.freelancerId._id.toString()  // if sender is client, send to freelancer
-    : conversation.client._id.toString();  
+      ? conversation.freelancerId._id.toString()  // if sender is client, send to freelancer
+      : conversation.client._id.toString();       // if sender is freelancer, send to client
+    
+    console.log('Chosen Recipient ID:', recipientId);
+
+    // Add debug logs to see the structure
+    console.log('Client profile:', conversation.client.profilePicture);
+    console.log('Freelancer profile:', conversation.freelancerId.profilePicture);
 
     const userChannel = ably.channels.get(`user-${recipientId}`);
     await userChannel.publish('message-notification', {
       _id: savedMessage._id,
       conversationId: conversation._id,
       projectTitle: conversation.projectId.title,
-      senderName: conversation.client._id.toString() === senderId ? conversation.client.firstName : conversation.freelancerId.firstName,
-      senderAvatar: conversation.client._id.toString() === senderId ? conversation.client.profilePicture : conversation.freelancerId.profilePicture,
+      senderName: conversation.client._id.toString() === senderId 
+        ? conversation.client.firstName 
+        : conversation.freelancerId.firstName,
+      // Use the URL for notifications (smaller payload)
+      senderAvatar: conversation.client._id.toString() === senderId 
+        ? conversation.client.profilePicture?.url
+        : conversation.freelancerId.profilePicture?.url,
       content: savedMessage.content
     });
 

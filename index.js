@@ -202,6 +202,8 @@ app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
 })
 
+app.use('/static', express.static('static'));
+
 
 
 

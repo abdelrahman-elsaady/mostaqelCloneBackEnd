@@ -50,13 +50,18 @@ let usersSchema = mongoose.Schema({
         default:"67057b9b9c7a9f52039a0242"
       },
   
-      
-      // jobTitle: { type: String, trim: true,default:'' },
-
       profilePicture: {
+
+        url: {
         type: String,
-        default:"https://th.bing.com/th/id/OIP.yYH0Z8hoEboWVtgM6i0xeQHaEK?rs=1&pid=ImgDetMain"
+          default: 'https://th.bing.com/th/id/OIP.yYH0Z8hoEboWVtgM6i0xeQHaEK?rs=1&pid=ImgDetMain'  // Path to your default image
+    },
+    data: {
+        type: String,
+        default: 'https://th.bing.com/th/id/OIP.yYH0Z8hoEboWVtgM6i0xeQHaEK?rs=1&pid=ImgDetMain'  // Your default image in base64
+    }
       },
+     
       bio: { type: String, trim: true,default:'' },
 
       skills: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
