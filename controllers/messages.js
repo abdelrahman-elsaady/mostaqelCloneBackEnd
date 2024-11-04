@@ -47,15 +47,15 @@ exports.sendMessage = async (req, res) => {
       });
     
         
-    pusher.trigger(`user-${senderId}`, 'message-notification', {
-      _id: savedMessage._id,
-      conversationId: conversation._id,
-      projectTitle: conversation.projectId.title,
-      senderName: sender.firstName,
-      senderAvatar: sender.profilePicture,
-      content: savedMessage.content,
-        createdAt: savedMessage.createdAt
-      });
+    // pusher.trigger(`user-${senderId}`, 'message-notification', {
+    //   _id: savedMessage._id,
+    //   conversationId: conversation._id,
+    //   projectTitle: conversation.projectId.title,
+    //   senderName: sender.firstName,
+    //   senderAvatar: sender.profilePicture,
+    //   content: savedMessage.content,
+    //     createdAt: savedMessage.createdAt
+    //   });
     
 
     res.status(201).json(populatedMessage);
