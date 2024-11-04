@@ -7,14 +7,8 @@ const Conversation = require('../models/conversation');
 exports.sendMessage = async (req, res) => {
   try {
     const { conversationId, senderId, content } = req.body;
-    const newMessage = { conversationId, senderId, content };
 
-    // Create and populate the message
-    const savedMessage = await messageModel.create(newMessage);
-    const populatedMessage = await messageModel.findById(savedMessage._id)
-      .populate('senderId');
-
-    // Update conversation's last message
+    // Find conversation first
     const conversation = await Conversation.findById(conversationId)
       .populate('client')
       .populate('freelancerId')
@@ -24,37 +18,51 @@ exports.sendMessage = async (req, res) => {
       return res.status(404).json({ message: 'Conversation not found' });
     }
 
+    // Create the message
+    const newMessage = await messageModel.create({
+      conversationId,
+      senderId,
+      content,
+      readBy: [senderId] // Mark as read by sender
+    });
+
+    // Populate the message with sender details
+    const populatedMessage = await messageModel.findById(newMessage._id)
+      .populate('senderId', 'firstName lastName profilePicture');
+
+    // Update conversation's last message
+    await Conversation.findByIdAndUpdate(
+      conversationId,
+      { lastMessage: newMessage._id },
+      { new: true }
+    );
 
     const pusher = req.app.get('pusher');
     
-    // Broadcast the new message to all users in the conversation
+    // Broadcast the new message to the conversation channel
+    console.log('Broadcasting to channel:', `conversation-${conversationId}`);
     pusher.trigger(`conversation-${conversationId}`, 'new-message', populatedMessage);
 
-    // Determine recipient and send notification
-    const recipientId = conversation.client._id.toString() == senderId 
+    // Determine recipient for notification
+    const recipientId = conversation.client._id.toString() === senderId 
       ? conversation.freelancerId._id.toString()
       : conversation.client._id.toString();
 
-
-
-    const sender = conversation.client._id.toString() == senderId 
+    const sender = conversation.client._id.toString() === senderId 
       ? conversation.client 
       : conversation.freelancerId;
 
-      // if(recipientId != senderId){
-
+    // Send notification to recipient
+    console.log('Sending notification to:', `user-${recipientId}`);
     pusher.trigger(`user-${recipientId}`, 'message-notification', {
-      _id: savedMessage._id,
+      _id: newMessage._id,
       conversationId: conversation._id,
       projectTitle: conversation.projectId.title,
       senderName: sender.firstName,
       senderAvatar: sender.profilePicture,
-      content: savedMessage.content,
-        createdAt: savedMessage.createdAt
-      });
-    
-    
-    
+      content: newMessage.content,
+      createdAt: newMessage.createdAt
+    });
 
     res.status(201).json(populatedMessage);
   } catch (error) {
