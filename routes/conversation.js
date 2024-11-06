@@ -19,7 +19,7 @@ router.get('/user/:id',  async (req, res) => {
       const conversations = await Conversation.find({
         $or: [{ client: userId }, { freelancerId: userId }]
       })
-      .populate('projectId', 'title', 'description')
+      .populate('projectId', 'title')
 
       .populate({
         path: 'client freelancerId',
