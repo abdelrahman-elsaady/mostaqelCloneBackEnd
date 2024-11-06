@@ -19,11 +19,11 @@ router.get('/user/:id',  async (req, res) => {
       const conversations = await Conversation.find({
         $or: [{ client: userId }, { freelancerId: userId }]
       })
-      .populate('projectId', 'title')
+      .populate('projectId')
 
       .populate({
         path: 'client freelancerId',
-        select: 'firstName lastName jobTitle profilePicture',
+        select: 'firstName lastName jobTitle  profilePicture',
         // match: { _id: { $ne: userId } }
       })
 

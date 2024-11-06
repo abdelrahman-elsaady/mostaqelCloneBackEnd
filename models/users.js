@@ -63,7 +63,7 @@ let usersSchema = mongoose.Schema({
         type: String,
         enum: ['client', 'freelancer'],
         // required: true
-        default:'client'
+        // default:'client'
       },
       location: {
         type: String,
