@@ -41,6 +41,8 @@ router.patch ('/updatePassword',author,updatePassword)
 
 router.patch('/:id', upload.single('profilePicture'), async (req, res) => {
     try {
+
+        console.log("aboooooooooooooooda");
         if (req.file) {
             // Update the profile picture path
             req.body.profilePicture = `/static/users/${req.file.filename}`;

@@ -15,6 +15,7 @@ router.get("/", showProposals);
 router.get("/project/:id", getProposalsByProjectId);
 router.post("/", saveProposal);
 router.delete("/:id", deleteProposal);
+ 
 router.patch("/:id", updateProposalById);
 
 module.exports = router;

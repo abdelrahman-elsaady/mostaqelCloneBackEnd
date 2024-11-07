@@ -1,6 +1,7 @@
 const userModel = require("../models/users");
 let jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const sharp = require('sharp');
 
 let showUsers = async (req, res, next) => {
   try {
@@ -113,32 +114,43 @@ let deleteUser = async (req, res) => {
 };
 
 let updateUser = async (req, res, next) => {
-  console.log("aboda");
   try {
-    console.log(req.body);
     let updates = req.body;
-    // console.log(updates);
-    if (req.file) {
-      updates.profilePicture = req.file.filename;
-    }
-
     
+    // Handle base64 image optimization
+    if (updates.profilePicture && updates.profilePicture.startsWith('data:image')) {
+      // Extract base64 data
+      const base64Data = updates.profilePicture.split(';base64,').pop();
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+      
+      // Optimize image
+      const optimizedImageBuffer = await sharp(imageBuffer)
+        .resize(400, 00, { // Adjust dimensions as needed
+          fit: 'inside',
+          withoutEnlargement: true
+        })
+        .jpeg({ quality: 50 }) // Adjust quality as needed (0-100)
+        .toBuffer();
+      
+      // Convert back to base64
+      updates.profilePicture = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
+    }
+    
+    // Handle skills if present
     if (updates.skills) {
       updates.skills = JSON.parse(updates.skills);
     }
 
     let user = await userModel.findByIdAndUpdate(req.params.id, updates, { new: true });
-    console.log(user);
     
     res.status(200).json({ message: "User was edited successfully", user: user });
-} catch (err) {
-
+  } catch (err) {
     if (err.name === 'ValidationError') {
-        res.status(400).json({ message: "Validation Error", error: err.message });
+      res.status(400).json({ message: "Validation Error", error: err.message });
     } else {
-        res.status(404).json({ message: "User not found" });
+      res.status(500).json({ message: "Error updating user", error: err.message });
     }
-}
+  }
 };
 
 let Login = async (req, res) => {

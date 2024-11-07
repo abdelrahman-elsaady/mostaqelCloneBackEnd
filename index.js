@@ -203,7 +203,7 @@ app.use('/',(req,res)=>{
 app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
 })
-
+app.use('/static/users', express.static(path.join(__dirname, 'static/users')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
 app.use('/static', (req, res, next) => {
