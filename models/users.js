@@ -6,6 +6,7 @@ const validator = require('validator');
 let usersSchema = mongoose.Schema({
 
 
+
     firstName: {
         type: String,
         // required: true,
@@ -52,7 +53,7 @@ let usersSchema = mongoose.Schema({
   
       profilePicture: {
         type: String,
-        default: 'https://i.ibb.co/3CqW2df/user.jpg'
+        default: 'https://i.ibb.co/MG513bH/Default-user.png'
       },
      
       bio: { type: String, trim: true,default:'' },
