@@ -58,7 +58,6 @@ let getProposalsByProjectId = async (req, res) => {
 
 let saveProposal = async (req, res) => {
   let newProposal = req.body;
-  console.log(newProposal)
   try {
     // Save the proposal
     let savedProposal = await proposalModel.create(newProposal);
@@ -71,24 +70,36 @@ let saveProposal = async (req, res) => {
     const project = await projectModel.findById(newProposal.project).populate('client');
     const freelancer = await userModel.findById(newProposal.freelancer);
 
-    // Initialize Ably
-    const ably = new Ably.Realtime(process.env.ABLY_API_KEY);
-    const channel = ably.channels.get(`user-${project.client._id}`);
+    // Get Ably instance from app
+    const ably = req.app.get('ably');
 
-    // Send notification
-    channel.publish('proposal-received', {
+    // Publish to project channel for real-time updates
+    const projectChannel = ably.channels.get(`project-${project._id}`);
+    await projectChannel.publish('new-proposal', {
+      _id: savedProposal._id,
+      freelancerId: freelancer._id,
+      projectId: project._id,
+      amount: newProposal.amount,
+      createdAt: savedProposal.createdAt
+    });
+
+    // Send notification to project owner
+    const userChannel = ably.channels.get(`user-${project.client._id}`);
+    await userChannel.publish('proposal-notification', {
       type: 'proposal',
+      _id: savedProposal._id,
       projectId: project._id,
       projectTitle: project.title,
       freelancerId: freelancer._id,
-      freelancerName: freelancer.name,
-      freelancerAvatar: freelancer.avatar,
+      freelancerName: freelancer.firstName,
+      freelancerAvatar: freelancer.profilePicture,
       proposalAmount: newProposal.amount,
       timestamp: new Date()
     });
 
     res.status(200).json({ message: "proposal saved successfully", data: savedProposal });
   } catch (err) {
+    console.error('Error saving proposal:', err);
     res.status(404).json(err.message);
   }
 };
