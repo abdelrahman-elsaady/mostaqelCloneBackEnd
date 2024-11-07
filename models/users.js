@@ -52,7 +52,7 @@ let usersSchema = mongoose.Schema({
   
       profilePicture: {
         type: String,
-        default: '/static/users/avatar.png'
+        default: 'https://i.ibb.co/3CqW2df/user.jpg'
       },
      
       bio: { type: String, trim: true,default:'' },
