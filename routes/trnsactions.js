@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/users');
 
+
 router.post('/transfer', async (req, res) => {
   const { senderId, receiverId, amount } = req.body;
   

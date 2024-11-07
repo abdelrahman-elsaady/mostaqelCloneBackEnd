@@ -59,15 +59,37 @@ let saveProposal = async (req, res) => {
   let newProposal = req.body;
   console.log(newProposal)
   try {
-    let savedUser = await proposalModel.create(newProposal);
+    // Save the proposal
+    let savedProposal = await proposalModel.create(newProposal);
 
-    await projectModel.findByIdAndUpdate(newProposal.project, { $push: { proposals: savedUser._id } });
-    await userModel.findByIdAndUpdate(newProposal.freelancer, { $push: { proposals: savedUser._id } });
-    res.status(200).json({ message: "proposal saved successfully", data: savedUser });
+    // Update related collections
+    await projectModel.findByIdAndUpdate(newProposal.project, { $push: { proposals: savedProposal._id } });
+    await userModel.findByIdAndUpdate(newProposal.freelancer, { $push: { proposals: savedProposal._id } });
+
+    // Get project details to find the owner
+    const project = await projectModel.findById(newProposal.project).populate('client');
+    const freelancer = await userModel.findById(newProposal.freelancer);
+
+    // Initialize Ably
+    const ably = new Ably.Realtime(process.env.ABLY_API_KEY);
+    const channel = ably.channels.get(`user-${project.client._id}`);
+
+    // Send notification
+    channel.publish('proposal-received', {
+      type: 'proposal',
+      projectId: project._id,
+      projectTitle: project.title,
+      freelancerId: freelancer._id,
+      freelancerName: freelancer.name,
+      freelancerAvatar: freelancer.avatar,
+      proposalAmount: newProposal.amount,
+      timestamp: new Date()
+    });
+
+    res.status(200).json({ message: "proposal saved successfully", data: savedProposal });
   } catch (err) {
     res.status(404).json(err.message);
   }
-  
 };
 let updateProposalById = async (req, res) => {
 

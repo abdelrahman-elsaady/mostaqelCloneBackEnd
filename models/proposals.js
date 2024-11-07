@@ -25,10 +25,7 @@ const proposalSchema = new Schema({
         type: Number,
         required: true
       },
-      // hasChat: {
-      //   type: Boolean,
-      //   default: false
-      // },
+    
       receivables: {
         type: Number,
         required: true
