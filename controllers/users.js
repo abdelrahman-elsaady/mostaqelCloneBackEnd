@@ -125,7 +125,7 @@ let updateUser = async (req, res, next) => {
       
       // Optimize image
       const optimizedImageBuffer = await sharp(imageBuffer)
-        .resize(400, 00, { // Adjust dimensions as needed
+        .resize(250, 250, { // Adjust dimensions as needed
           fit: 'inside',
           withoutEnlargement: true
         })
