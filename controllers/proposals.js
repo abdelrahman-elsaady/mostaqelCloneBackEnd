@@ -1,6 +1,6 @@
 const proposalModel = require("../models/proposals");
 const projectModel = require("../models/project");
-const Ably = require('ably');
+// const Ably = require('ably');
 const userModel = require("../models/users");
 
 let showProposals = async (req, res) => {
@@ -62,47 +62,64 @@ let saveProposal = async (req, res) => {
     // Save the proposal
     let savedProposal = await proposalModel.create(newProposal);
 
-    // Update related collections
-    await projectModel.findByIdAndUpdate(newProposal.project, { $push: { proposals: savedProposal._id } });
-    await userModel.findByIdAndUpdate(newProposal.freelancer, { $push: { proposals: savedProposal._id } });
+    // Update related collections in parallel for better performance
+    await Promise.all([
+      projectModel.findByIdAndUpdate(newProposal.project, { 
+        $push: { proposals: savedProposal._id } 
+      }),
+      userModel.findByIdAndUpdate(newProposal.freelancer, { 
+        $push: { proposals: savedProposal._id } 
+      })
+    ]);
 
-    // Get project details to find the owner
-    const project = await projectModel.findById(newProposal.project).populate('client');
-    const freelancer = await userModel.findById(newProposal.freelancer);
+    // Get project and freelancer details in parallel
+    const [project, freelancer] = await Promise.all([
+      projectModel.findById(newProposal.project).populate('client'),
+      userModel.findById(newProposal.freelancer)
+    ]);
 
-    // Get Ably instance from app
+    // Get Ably instance
     const ably = req.app.get('ably');
 
-    // Publish to project channel for real-time updates
-    const projectChannel = ably.channels.get(`project-${project._id}`);
-    await projectChannel.publish('new-proposal', {
-      _id: savedProposal._id,
-      freelancerId: freelancer._id,
-      projectId: project._id,
-      amount: newProposal.amount,
-      createdAt: savedProposal.createdAt
+    // Send notifications in parallel
+    await Promise.all([
+      // Project channel notification
+      ably.channels.get(`project-${project._id}`).publish('new-proposal', {
+        _id: savedProposal._id,
+        freelancerId: freelancer._id,
+        projectId: project._id,
+        amount: newProposal.amount,
+        createdAt: savedProposal.createdAt
+      }),
+
+      // User channel notification
+      ably.channels.get(`user-${project.client._id}`).publish('proposal-notification', {
+        type: 'proposal',
+        _id: savedProposal._id,
+        projectId: project._id,
+        projectTitle: project.title,
+        freelancerId: freelancer._id,
+        freelancerName: freelancer.firstName,
+        freelancerAvatar: freelancer.profilePicture,
+        proposalAmount: newProposal.amount,
+        timestamp: new Date()
+      })
+    ]);
+
+    res.status(200).json({ 
+      message: "proposal saved successfully", 
+      data: savedProposal 
     });
 
-    // Send notification to project owner
-    const userChannel = ably.channels.get(`user-${project.client._id}`);
-    await userChannel.publish('proposal-notification', {
-      type: 'proposal',
-      _id: savedProposal._id,
-      projectId: project._id,
-      projectTitle: project.title,
-      freelancerId: freelancer._id,
-      freelancerName: freelancer.firstName,
-      freelancerAvatar: freelancer.profilePicture,
-      proposalAmount: newProposal.amount,
-      timestamp: new Date()
-    });
-
-    res.status(200).json({ message: "proposal saved successfully", data: savedProposal });
   } catch (err) {
     console.error('Error saving proposal:', err);
-    res.status(404).json(err.message);
+    res.status(500).json({ 
+      message: "Error saving proposal", 
+      error: err.message 
+    });
   }
 };
+
 let updateProposalById = async (req, res) => {
 
   try {
