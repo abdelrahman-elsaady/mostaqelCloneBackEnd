@@ -2,7 +2,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Transaction = require('../models/Transaction');
 const Project = require('../models/project');
 const User = require('../models/users');
-const PlatformEarnings = require('../models/platformEarning');
+const PlatformEarnings = require('../models/platformEarnings');
 
 const PLATFORM_FEE_PERCENTAGE = 0.15; // 15%
 
