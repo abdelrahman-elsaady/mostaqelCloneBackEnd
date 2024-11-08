@@ -39,6 +39,7 @@ const upload = multer({
 
 // Add new file upload endpoint
 exports.uploadFile = async (req, res) => {
+  console.log("uploadFileeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
   try {
     upload(req, res, async function (err) {
       if (err) {
@@ -49,8 +50,10 @@ exports.uploadFile = async (req, res) => {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
+      console.log('File saved to:', req.file.path);
+      
       const { conversationId, senderId } = req.body;
-      const fileUrl = `${process.env.BASE_URL}/uploads/${req.file.filename}`;
+      const fileUrl = `http://localhost:3344/uploads/${req.file.filename}`;
       
       const newMessage = {
         conversationId,

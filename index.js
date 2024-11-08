@@ -24,6 +24,15 @@ console.log('Ably configuration:', {
   apiKey: process.env.ABLY_API_KEY ? 'Set' : 'Not set'
 });
 
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Uploads directory created at:', uploadsDir);
+}
+
+// Add this log to verify the directory is being served
+console.log('Serving uploads from:', uploadsDir);
 
 app.use(cors({
   origin: '*'
@@ -152,6 +161,8 @@ const conversationRoutes = require('./routes/conversation');
 const messageRoutes = require('./routes/messages');
 const transactionRoutes = require('./routes/trnsactions');
 const paypalRoutes = require('./routes/paypal');
+const paymentRoutes = require('./routes/payment');
+const earningRoutes = require('./routes/earning');
 //const authRouter = require('./routes/auth')
 
 
@@ -193,12 +204,12 @@ app.use('/skills', skillRoutes);
 app.use('/portfolio', portfolioRoutes);
 app.use('/balance', balanceRoutes);
 app.use('/conversations', conversationRoutes);
-app.use('/messages', messageRoutes);
+// app.use('/messages', messageRoutes);
 app.use('/transactions', transactionRoutes);
 app.use('/paypal', paypalRoutes);
-app.use('/',(req,res)=>{
-  res.send("hello world")
-});
+app.use('/payment', paymentRoutes);
+app.use('/earning', earningRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
@@ -230,7 +241,9 @@ app.use('/static/users/*', (req, res, next) => {
 });
 
 // Add this line to serve static files from the uploads directory
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', (req,res)=>{
+  res.send("hello world abo")
+});
 
 const PORT = process.env.PORT || 3344;
 app.listen(PORT, () => {

@@ -2,8 +2,10 @@
 
 
 const projectModel = require('../models/project');
-
-
+const proposalModel = require('../models/proposals');
+const Transaction = require('../models/Transaction');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const User = require('../models/users');
 let createProject = async (req, res , next) => {
 
   let newProject = req.body;
@@ -137,6 +139,79 @@ let deleteProject = async (req, res) => {
   }
 };
 
+let acceptProposal = async (req, res) => {
+  try {
+    const { projectId, proposalId,userId } = req.body;
+    console.log(req.body)
+    // Verify the user is the project owner
+    const project = await projectModel.findById(projectId).populate('client');
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    if (project.client._id.toString() !== userId) {
+      return res.status(403).json({ message: 'Not authorized to accept proposals for this project' });
+    }
+
+    // Get the proposal
+    const proposal = await proposalModel.findById(proposalId)
+      .populate('freelancer')
+      .populate('project');
+
+    if (!proposal) {
+      return res.status(404).json({ message: 'Proposal not found' });
+    }
+
+    // Calculate platform fee (15%)
+    const platformFee = proposal.amount * 0.15;
+    const totalAmount = proposal.amount + platformFee;
+
+    // Create payment intent for the client
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(totalAmount * 100), // Convert to cents
+      currency: 'usd',
+      metadata: {
+        projectId,
+        proposalId,
+        freelancerId: proposal.freelancer._id.toString(),
+        platformFee
+      }
+    });
+
+    // Update project status
+    project.status = 'pending_payment';
+    project.acceptedProposal = proposalId;
+    await project.save();
+
+    // Create transaction record
+    await Transaction.create({
+      type: 'PAYMENT',
+      amount: totalAmount,
+      fee: platformFee,
+      status: 'PENDING',
+      project: projectId,
+      payer: project.client._id,
+      payee: proposal.freelancer._id,
+      paymentMethod: 'STRIPE',
+      paymentDetails: {
+        paymentIntentId: paymentIntent.id
+      }
+    });
+    
+    res.json({
+      success: true,
+      proposal,
+      clientSecret: paymentIntent.client_secret
+    });
+
+  } catch (error) {
+    console.error('Error accepting proposal:', error);
+    res.status(500).json({ 
+      message: 'Error accepting proposal', 
+      error: error.message 
+    });
+  }
+};
 // let updateProposal = async (req, res) => {
 //   console.log(req.body)
 //   console.log(req.params)
@@ -153,4 +228,4 @@ let deleteProject = async (req, res) => {
 // }
 
 
-module.exports={createProject , getProjects  , getProjectById, updateProject , deleteProject, saveProposal, getProjectsByClient   }
+module.exports={createProject , getProjects  , getProjectById, updateProject , deleteProject, saveProposal, getProjectsByClient , acceptProposal }

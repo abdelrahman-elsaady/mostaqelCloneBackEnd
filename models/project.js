@@ -83,7 +83,7 @@ const ProjectSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['open', 'in_progress', 'completed', 'cancelled'],
+    enum: ['open', 'pending_payment', 'in_progress', 'completed', 'cancelled'],
     default: 'open'
   },
   createdAt: {
@@ -93,6 +93,24 @@ const ProjectSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['UNPAID', 'ESCROW', 'RELEASED', 'REFUNDED'],
+    default: 'UNPAID'
+  },
+  agreedAmount: {
+    type: Number
+  },
+  acceptedProposal: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'proposals'
+  },
+  platformFee: {
+    type: Number
+  },
+  escrowId: {
+    type: String
   }
 });
 
@@ -116,3 +134,17 @@ module.exports = projectModel
 // const Project = mongoose.model('Project', projectSchema);
 
 // module.exports = Project;
+// status: {
+//   type: String,
+//   enum: ['open', 'pending_payment', 'in_progress', 'completed', 'cancelled'],
+//   default: 'open'
+// },
+// acceptedProposal: {
+//   type: mongoose.Schema.Types.ObjectId,
+//   ref: 'proposals'
+// },
+// paymentStatus: {
+//   type: String,
+//   enum: ['unpaid', 'pending', 'paid', 'refunded'],
+//   default: 'unpaid'
+// }
