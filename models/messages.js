@@ -1,6 +1,3 @@
-
-
-
 const mongoose = require('mongoose');
 
 const MessageSchema = new mongoose.Schema({
@@ -26,48 +23,13 @@ const MessageSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  fileUrl: {
+    type: String
+  },
+  fileSize: {
+    type: Number
   }
 });
 
 module.exports = mongoose.model('Message', MessageSchema);
-
-
-
-
-
-
-
-
-
-
-
-
-// const mongoose = require('mongoose');
-
-// const messageSchema = new mongoose.Schema({
-//     content: { 
-//         type: String, 
-//         required: true 
-//     },
-//     timestamp: { 
-//         type: Date, 
-//         default: Date.now 
-//     },
-//     status: { 
-//         type: String, 
-//         enum: ['sent', 'read'], 
-//         default: 'sent' 
-//     },
-//     freelancerID: { 
-//         type: mongoose.Schema.ObjectId, 
-//         ref: 'user', required: true 
-//     },
-//     clientID: { 
-//         type: mongoose.Schema.ObjectId, 
-//         ref: 'user', required: true 
-//     }
-// });
-
-// const messageModel = mongoose.model('message', messageSchema);
-
-//  module.exports =messageModel

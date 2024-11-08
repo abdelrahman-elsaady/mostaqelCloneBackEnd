@@ -1,6 +1,3 @@
-
-
-
 const express = require('express');
 const Message = require('../models/messages');
 const router = express.Router();
@@ -65,11 +62,8 @@ router.post('/read/:messageId',  async (req, res) => {
     }
   });
 
-
-
-
-
-
+// Add new route for file uploads
+router.post('/upload', messageController.uploadFile);
 
 module.exports = router;
 

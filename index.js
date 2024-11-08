@@ -229,6 +229,9 @@ app.use('/static/users/*', (req, res, next) => {
     next();
 });
 
+// Add this line to serve static files from the uploads directory
+app.use('/uploads', express.static('uploads'));
+
 const PORT = process.env.PORT || 3344;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
