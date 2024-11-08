@@ -53,7 +53,7 @@ exports.uploadFile = async (req, res) => {
       console.log('File saved to:', req.file.path);
       
       const { conversationId, senderId } = req.body;
-      const fileUrl = `https://mostaqel-clone-back-end-abdelrahmans-projects-44ce2102.vercel.app/uploads/${req.file.filename}`;
+      const fileUrl = `http://localhost:3344/uploads/${req.file.filename}`;
       
       const newMessage = {
         conversationId,
