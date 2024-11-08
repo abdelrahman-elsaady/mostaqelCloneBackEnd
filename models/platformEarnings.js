@@ -13,12 +13,24 @@ const platformEarningsSchema = new mongoose.Schema({
     },
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'user'
     },
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'user'
     },
+    pendingTransfer: {
+        amount: Number,
+        paypalOrderId: String,
+        status: {
+          type: String,
+          enum: ['PENDING', 'COMPLETED', 'FAILED'],
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now
+        }
+      },
     timestamp: {
       type: Date,
       default: Date.now

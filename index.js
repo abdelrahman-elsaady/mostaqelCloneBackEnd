@@ -163,6 +163,7 @@ const transactionRoutes = require('./routes/trnsactions');
 const paypalRoutes = require('./routes/paypal');
 const paymentRoutes = require('./routes/payment');
 const earningRoutes = require('./routes/earning');
+const platformEarningsRoutes = require('./routes/platformEarnings');
 //const authRouter = require('./routes/auth')
 
 
@@ -209,6 +210,7 @@ app.use('/transactions', transactionRoutes);
 app.use('/paypal', paypalRoutes);
 app.use('/payment', paymentRoutes);
 app.use('/earning', earningRoutes);
+app.use('/platformEarnings', platformEarningsRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 app.use('*', function (req, res, next) {
