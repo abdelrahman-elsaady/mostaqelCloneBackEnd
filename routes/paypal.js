@@ -5,6 +5,7 @@ const paypal = require('@paypal/payouts-sdk');
 const router = express.Router();
 
 // Configure PayPal environment
+
 let clientId = process.env.PAYPAL_CLIENT_ID;
 let clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 let environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
@@ -14,6 +15,13 @@ router.post('/paypal-withdrawal', async (req, res) => {
   try {
     const { userId, amount, email } = req.body;
     console.log(userId, amount, email);
+
+
+
+
+    
+
+
 
     // Create a payout
     let request = new paypal.payouts.PayoutsPostRequest();

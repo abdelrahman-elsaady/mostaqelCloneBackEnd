@@ -1,12 +1,14 @@
 const jobsModel = require("../models/jobs");
 
 let showJobs = async (req, res) => {
+  
   try {
     let jobs = await jobsModel.find();
     res.status(200).json({ message: "success", jobs });
   } catch (err) {
     res.status(404).json(err);
   }
+
 };
 
 let saveJob = async (req, res) => {

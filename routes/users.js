@@ -8,7 +8,7 @@ const fs = require('fs');
 
 let {author,restrictTo}=require('../middlewares/authorization')
 
-let {saveUser , showUsers , getUserByID , deleteUser , updateUser ,  Login ,updatePassword ,getUserByEmail ,getUsersByRole} = require('../controllers/users')
+let {saveUser , showUsers , getUserByID , deleteUser , updateUser ,  Login ,updatePassword ,getUserByEmail ,getUsersByRole,getFreelancers,getClients} = require('../controllers/users')
 // Configure multer for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -27,17 +27,20 @@ if (!fs.existsSync(staticDir)) {
     fs.mkdirSync(staticDir, { recursive: true });
 }
 
+router.get('/freelancers', getFreelancers);
+router.get('/clients', getClients);
 router.get('/role', getUsersByRole);
+router.get('/email', getUserByEmail);
 
-router.get('/' , showUsers)
-router.post('/' , saveUser)
-router.get('/email', getUserByEmail)
-router.get('/:id' , getUserByID) 
-router.delete('/:id',author, deleteUser)
+router.get('/', showUsers);
+router.post('/', saveUser);
 
-router.patch('/:id' ,upload.single('profilePicture'), updateUser )
-router.post ('/login',Login)
-router.patch ('/updatePassword',author,updatePassword)
+router.get('/:id', getUserByID);
+router.delete('/:id', author, deleteUser);
+router.patch('/:id', upload.single('profilePicture'), updateUser);
+
+router.post('/login', Login);
+router.patch('/updatePassword', author, updatePassword);
 
 router.patch('/:id', upload.single('profilePicture'), async (req, res) => {
     try {

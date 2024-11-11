@@ -216,6 +216,37 @@ let updatePassword = async (req, res) => {
   res.status(200).json({ token: token });
 };
 
+const getFreelancers = async (req, res) => {
+  try {
+    const freelancers = await userModel.find({ role: 'freelancer' });
+    res.status(200).json({
+      message: "success",
+      freelancers
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      message: 'Error fetching freelancers', 
+      error: error.message 
+    });
+  }
+};
+
+
+const getClients = async (req, res) => {
+  try {
+    const clients = await userModel.find({ role: 'client' });
+    res.status(200).json({
+      message: "success",
+      clients
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      message: 'Error fetching clients', 
+      error: error.message 
+    });
+  }
+};
+
 module.exports = {
   saveUser,
   showUsers,
@@ -226,4 +257,6 @@ module.exports = {
   updatePassword,
   getUserByEmail,
   getUsersByRole,
+  getFreelancers,
+  getClients
 };
