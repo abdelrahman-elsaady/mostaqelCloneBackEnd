@@ -144,7 +144,7 @@ console.log('Pusher configuration:', {
 
 
 const userRouter = require('./routes/users')
-const jobsRouter = require('./routes/jobs')
+// const jobsRouter = require('./routes/jobs')
 const messageRouter = require('./routes/messages')
 const paymentRouter = require('./routes/payment')
 const categoriesRouter = require('./routes/categories')
@@ -190,8 +190,9 @@ app.use((err, req, res, next) => {
 
 app.use(express.json())
 
+
 app.use('/users', userRouter)
-app.use('/jobs', jobsRouter)
+// app.use('/jobs', jobsRouter)
 app.use('/messages', messageRouter)
 app.use('/payment', paymentRouter)
 app.use('/categories', categoriesRouter)
