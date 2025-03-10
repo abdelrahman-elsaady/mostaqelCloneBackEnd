@@ -32,7 +32,7 @@ router.get('/clients', getClients);
 router.get('/role', getUsersByRole);
 router.get('/email', getUserByEmail);
 
-router.get('/', showUsers);
+router.get('/', getFreelancers);
 router.post('/', saveUser);
 
 router.get('/:id', getUserByID);

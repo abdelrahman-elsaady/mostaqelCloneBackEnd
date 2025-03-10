@@ -166,7 +166,6 @@ app.use('/static/users/*', (req, res, next) => {
     next();
 });
 
-// Add this line to serve static files from the uploads directory
 app.use('/uploads', (req,res)=>{
   res.send("hello world abo")
 });
@@ -177,6 +176,5 @@ app.listen(PORT, () => {
 });
 
 // Make io accessible to our router
-// app.set('io', io);
 app.set('pusher', pusher);
 // app.set('connectedUsers', connectedUsers);

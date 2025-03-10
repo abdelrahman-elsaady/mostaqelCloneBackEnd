@@ -218,17 +218,16 @@ let updatePassword = async (req, res) => {
 
 const getFreelancers = async (req, res) => {
   try {
-    const freelancers = await userModel.find({ role: 'freelancer' });
-    res.status(200).json({
-      message: "success",
-      freelancers
-    });
+    const users = await userModel.find({ role: 'freelancer' }).populate('category');
+    res.status(200).json({ message: "success", users }
+    );
   } catch (error) {
     res.status(500).json({ 
       message: 'Error fetching freelancers', 
       error: error.message 
     });
   }
+
 };
 
 
