@@ -218,16 +218,36 @@ let updatePassword = async (req, res) => {
 
 const getFreelancers = async (req, res) => {
   try {
-    const users = await userModel.find({ role: 'freelancer' }).populate('category');
-    res.status(200).json({ message: "success", users }
-    );
+    const page = parseInt(req.query.page) || 1; // Get page from query params, default to 1
+    const limit = 10; // Number of freelancers per page
+    const skip = (page - 1) * limit;
+
+    // Get total count of freelancers for pagination info
+    const totalFreelancers = await userModel.countDocuments({ role: 'freelancer' });
+    const totalPages = Math.ceil(totalFreelancers / limit);
+
+    const users = await userModel
+      .find({ role: 'freelancer' })
+      .populate('category')
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({ 
+      message: "success", 
+      users,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalFreelancers,
+        freelancersPerPage: limit
+      }
+    });
   } catch (error) {
     res.status(500).json({ 
       message: 'Error fetching freelancers', 
       error: error.message 
     });
   }
-
 };
 
 
