@@ -1,3 +1,4 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/abdelrahman-elsaady/mostaqelCloneBackEnd)
 # Mostaqel Backend API
 
 A robust backend API for a freelancing platform built with Node.js, Express, and MongoDB.
