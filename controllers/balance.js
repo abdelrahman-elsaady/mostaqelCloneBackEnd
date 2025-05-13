@@ -23,7 +23,7 @@ if (!stripe) {
             description: 'Deposit to account',
             payment_method: id,
             confirm: true,
-            return_url: `https://mostaqel-clone.vercel.app/freelancers`, // Add this line
+            return_url: `https://mostaqel-clone.vercel.app/freelancers`, 
         });
 
         console.log("Payment intent created:", paymentIntent.id);

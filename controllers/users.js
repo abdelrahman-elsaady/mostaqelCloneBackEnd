@@ -218,16 +218,58 @@ let updatePassword = async (req, res) => {
 
 const getFreelancers = async (req, res) => {
   try {
-    const users = await userModel.find({ role: 'freelancer' }).populate('category');
-    res.status(200).json({ message: "success", users }
-    );
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    const { category, search } = req.query;
+
+    // Build the query object
+    let query = { role: 'freelancer' };
+    
+    // Add name search if provided
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // First get all freelancers with populated category
+    let users = await userModel.find(query)
+      .populate('category')
+      .sort({ createdAt: -1 });
+
+    // Filter by category name if provided
+    if (category) {
+      users = users.filter(user => 
+        user.category && user.category.name === category
+      );
+    }
+
+    // Get total count after category filtering
+    const total = users.length;
+
+    // Apply pagination after all filtering
+    users = users.slice(skip, skip + limit);
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).json({ 
+      message: "success", 
+      users,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalFreelancers: total,
+        freelancersPerPage: limit
+      }
+    });
   } catch (error) {
     res.status(500).json({ 
       message: 'Error fetching freelancers', 
       error: error.message 
     });
   }
-
 };
 
 
