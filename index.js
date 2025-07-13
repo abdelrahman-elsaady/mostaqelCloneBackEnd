@@ -6,17 +6,12 @@ let env = require('dotenv')
 const app = express();
 const http = require('http');
 env.config()
-// const { Server } = require("socket.io");
-const Pusher = require('pusher')
-const Ably = require('ably');
-const path = require('path');
-const fs = require('fs');
 
-// Remove Pusher configuration
+
+
 // Add Ably configuration
 const ably = new Ably.Rest(process.env.ABLY_API_KEY);
 
-// Make ably accessible to routes
 app.set('ably', ably);
 
 // Add environment variable check
@@ -37,32 +32,6 @@ console.log('Serving uploads from:', uploadsDir);
 app.use(cors({
   origin: '*'
 }))
-
-
-//pusher
-
-const pusher = new Pusher({
-  appId: process.env.PUSHER_APP_ID,
-  key: process.env.PUSHER_KEY,
-  secret: process.env.PUSHER_SECRET,
-  cluster: process.env.PUSHER_CLUSTER,
-  useTLS: true
-
-});
-
-
-console.log('Pusher configuration:', {
-  appId: process.env.PUSHER_APP_ID,
-  key: process.env.PUSHER_KEY,
-  secret: process.env.PUSHER_SECRET,
-  cluster: process.env.PUSHER_CLUSTER
-});
-
-
-
-
-
-
 
 
 
@@ -111,6 +80,8 @@ app.use((err, req, res, next) => {
   res.status(statusCode).send({ message: err.message })
 })
 
+
+
 app.use(express.json())
 
 
@@ -140,31 +111,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use('*', function (req, res, next) {
   next({ statusCode: 404, message: "not found" })
 })
-app.use('/static/users', express.static(path.join(__dirname, 'static/users')));
-app.use('/static', express.static(path.join(__dirname, 'static')));
-
-app.use('/static', (req, res, next) => {
-    console.log('Static file requested:', req.url);
-    next();
-});
-
-app.use('/static/users', (req, res, next) => {
-    // If requested image doesn't exist, serve default avatar
-    const requestedPath = path.join(__dirname, 'static/users', req.path);
-    if (!fs.existsSync(requestedPath)) {
-        return res.sendFile(path.join(__dirname, 'static/users/avatar.png'));
-    }
-    next();
-});
-
-app.use('/static/users/*', (req, res, next) => {
-    const filePath = path.join(__dirname, req.url);
-    if (!fs.existsSync(filePath)) {
-        // If requested image doesn't exist, serve default
-        return res.sendFile(path.join(__dirname, 'static/users/avatar.png'));
-    }
-    next();
-});
 
 app.use('/uploads', (req,res)=>{
   res.send("hello world abo")
@@ -174,7 +120,3 @@ const PORT = process.env.PORT || 3344;
 app.listen(PORT, () => {
   console.log(`Server running on portt ${PORT}`);
 });
-
-// Make io accessible to our router
-app.set('pusher', pusher);
-// app.set('connectedUsers', connectedUsers);

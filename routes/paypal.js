@@ -4,7 +4,6 @@ const express = require('express');
 const paypal = require('@paypal/payouts-sdk');
 const router = express.Router();
 
-// Configure PayPal environment
 
 let clientId = process.env.PAYPAL_CLIENT_ID;
 let clientSecret = process.env.PAYPAL_CLIENT_SECRET;
@@ -17,13 +16,6 @@ router.post('/paypal-withdrawal', async (req, res) => {
     console.log(userId, amount, email);
 
 
-
-
-    
-
-
-
-    // Create a payout
     let request = new paypal.payouts.PayoutsPostRequest();
     request.requestBody({
       sender_batch_header: {
@@ -47,10 +39,7 @@ router.post('/paypal-withdrawal', async (req, res) => {
     console.log(`Payout created successfully`);
 
     
-    // Update user balance in your database here
-    // This is just a placeholder, replace with your actual database update logic
-    // await updateUserBalance(userId, amount);
-
+    
     res.json({ success: true, payoutId: response.result.batch_header.payout_batch_id });
   } catch (error) {
     console.error('Error processing PayPal payout:', error);

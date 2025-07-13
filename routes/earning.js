@@ -2,8 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const { getEarnings } = require('../controllers/earning');
-// const { protect } = require('../middleware/authMiddleware');
+let {author,restrictTo}=require('../middlewares/authorization')
 
-router.get('/:userId', getEarnings);
+router.get('/:userId', author, getEarnings);
 
 module.exports = router;

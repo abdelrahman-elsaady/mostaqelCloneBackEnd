@@ -1,8 +1,6 @@
 const express = require("express");
 let router = express.Router();
-
-// let {author,restrictTo}=require('../middlewares/authorization')
-
+let {author,restrictTo}=require('../middlewares/authorization')
 let {
   showProposals,
   saveProposal,
@@ -13,9 +11,8 @@ let {
 
 router.get("/", showProposals);
 router.get("/project/:id", getProposalsByProjectId);
-router.post("/", saveProposal);
-router.delete("/:id", deleteProposal);
- 
-router.patch("/:id", updateProposalById);
+router.post('/', author, saveProposal);
+router.delete('/:id', author, deleteProposal);
+router.patch('/:id', author, updateProposalById);
 
 module.exports = router;

@@ -3,17 +3,13 @@ const Message = require('../models/messages');
 const router = express.Router();
 const Conversation = require('../models/conversation');
 const messageController = require('../controllers/messages');
+let {author,restrictTo}=require('../middlewares/authorization')
 
-router.post('/', messageController.sendMessage);
-router.get('/:conversationId', messageController.getMessages);
-
-router.post('/read/:messageId',  async (req, res) => {
+router.post('/', author, messageController.sendMessage);
+router.get('/:conversationId', author, messageController.getMessages);
+router.post('/read/:messageId', author, async (req, res) => {
     const {messageId} = req.params
     const {userId} = req.body
-    console.log(req.body);
-    
-    console.log(messageId,userId)
-    console.log("salah")
     try {
       const message = await Message.findByIdAndUpdate(
         messageId,
@@ -24,14 +20,8 @@ router.post('/read/:messageId',  async (req, res) => {
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
-  });
-
-
-
-
-
-
-  router.get('/recent/:userId', async (req, res) => {
+});
+router.get('/recent/:userId', author, async (req, res) => {
     try {
       const recentConversations = await Conversation.find({
         $or: [{ client: req.params.userId }, { freelancerId: req.params.userId }]
@@ -42,7 +32,6 @@ router.post('/read/:messageId',  async (req, res) => {
         .populate('freelancerId', 'firstName lastName profilePicture')
         .populate('projectId', 'title')
         .populate('lastMessage');
-  
       const formattedConversations = recentConversations.map(conv => {
         const otherUser = conv.client._id.toString() === req.params.userId ? conv.freelancerId : conv.client;
         return {
@@ -55,43 +44,11 @@ router.post('/read/:messageId',  async (req, res) => {
           readBy: conv.lastMessage ? conv.lastMessage.readBy : []
         };
       });
-  
       res.json(formattedConversations);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
-  });
-
-// Add new route for file uploads
-router.post('/upload', messageController.uploadFile);
+});
+router.post('/upload', author, messageController.uploadFile);
 
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
-
-// const express = require('express')
-// let router = express.Router()
-// let {author,restrictTo}=require('../middlewares/authorization')
-
-
-// let {saveMessage , showMessages , deleteMessage, updateMessage } = require('../controllers/messages')
-
-
-
-// router.get('/' , showMessages)
-// router.post('/' , saveMessage)
-// router.delete('/:id' , deleteMessage)
-// router.patch('/:id' , updateMessage)
-
-
-
-// module.exports=router

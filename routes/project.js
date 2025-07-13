@@ -1,28 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const {createProject , getProjects  , updateProject , deleteProject , getProjectById, saveProposal, getProjectsByClient, acceptProposal} = require('../controllers/project');
-// const { protect } = require('../middleware/authMiddleware'); // Middleware to protect routes
-
 let {author,restrictTo}=require('../middlewares/authorization')
 
-router.post('/', createProject);
-
+router.post('/', author, createProject);
 router.get('/', getProjects);
-
-
-router.post('/accept-proposal', acceptProposal);
-
-
-
-router.get('/client/:id', getProjectsByClient);
-
-
-router.post('/proposals/:id', saveProposal);
-
-router.patch('/:id', updateProject);
+router.post('/accept-proposal', author, acceptProposal);
+router.get('/client/:id', author, getProjectsByClient);
+router.post('/proposals/:id', author, saveProposal);
+router.patch('/:id', author, updateProject);
 router.get('/:id', getProjectById);
-
-
-router.delete('/:id',deleteProject);
+router.delete('/:id', author, deleteProject);
 
 module.exports = router;

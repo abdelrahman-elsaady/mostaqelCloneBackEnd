@@ -5,10 +5,11 @@ const {
   initiatePaypalTransfer,
   completePaypalTransfer
 } = require('../controllers/platformEarnings');
+let {author,restrictTo}=require('../middlewares/authorization')
 
-router.get('/', getPlatformEarnings);
-router.post('/transfer', initiatePaypalTransfer);
-router.get('/transfer/complete/:orderId', completePaypalTransfer);
+router.get('/', author, getPlatformEarnings);
+router.post('/transfer', author, initiatePaypalTransfer);
+router.get('/transfer/complete/:orderId', author, completePaypalTransfer);
 
 module.exports = router;
 

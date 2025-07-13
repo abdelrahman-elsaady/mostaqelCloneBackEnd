@@ -1,14 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { createNotification  , getNotificationsByUser ,updateNotification , deleteNotification} = require('../controllers/Notification');
+const { createNotification, getNotificationsByUser, updateNotification, deleteNotification } = require('../controllers/Notification');
 let {author,restrictTo}=require('../middlewares/authorization')
 
-
-router.post('/', createNotification);
-
-router.get('/',  getNotificationsByUser);
-
-router.patch('/:id', updateNotification)
-router.delete('/:id', deleteNotification);
+router.post('/', author, createNotification);
+router.get('/', getNotificationsByUser);
+router.put('/:id', author, updateNotification);
+router.delete('/:id', author, deleteNotification);
 
 module.exports = router;

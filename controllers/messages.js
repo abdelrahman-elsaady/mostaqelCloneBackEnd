@@ -39,7 +39,6 @@ const upload = multer({
 
 // Add new file upload endpoint
 exports.uploadFile = async (req, res) => {
-  console.log("uploadFileeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
   try {
     upload(req, res, async function (err) {
       if (err) {
@@ -49,8 +48,6 @@ exports.uploadFile = async (req, res) => {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
       }
-
-      console.log('File saved to:', req.file.path);
       
       const { conversationId, senderId } = req.body;
       const fileUrl = `http://localhost:3344/uploads/${req.file.filename}`;
@@ -117,20 +114,9 @@ exports.sendMessage = async (req, res) => {
       readBy: savedMessage.readBy
     });
 
-    // Add debug logs
-    console.log('Sender ID:', senderId);
-    console.log('Client ID:', conversation.client._id.toString());
-    console.log('Freelancer ID:', conversation.freelancerId._id.toString());
-    
     let recipientId = conversation.client._id.toString() === senderId 
       ? conversation.freelancerId._id.toString()  // if sender is client, send to freelancer
       : conversation.client._id.toString();       // if sender is freelancer, send to client
-    
-    console.log('Chosen Recipient ID:', recipientId);
-
-    // Add debug logs to see the structure
-    console.log('Client profile:', conversation.client.profilePicture);
-    console.log('Freelancer profile:', conversation.freelancerId.profilePicture);
 
     const userChannel = ably.channels.get(`user-${recipientId}`);
     await userChannel.publish('message-notification', {
@@ -140,7 +126,6 @@ exports.sendMessage = async (req, res) => {
       senderName: conversation.client._id.toString() === senderId 
         ? conversation.client.firstName 
         : conversation.freelancerId.firstName,
-      // Use the URL for notifications (smaller payload)
       senderAvatar: conversation.client._id.toString() === senderId 
         ? conversation.client.profilePicture
         : conversation.freelancerId.profilePicture,

@@ -2,36 +2,20 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-
-
-
-
-
-const { getUserPortfolios } = require('../controllers/portfolio'); 
-const { createPortfolio } = require('../controllers/portfolio'); 
+const { getUserPortfolios, createPortfolio } = require('../controllers/portfolio');
+let {author,restrictTo}=require('../middlewares/authorization')
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-    return  cb(null, './static/users') // Make sure this directory exists
+        return cb(null, './static/users')
     },
     filename: function (req, file, cb) {
-     return cb(null, `${Date.now()}-${file.originalname}`) // Appending extension
+        return cb(null, `${Date.now()}-${file.originalname}`)
     }
-  });
-  
-  const upload = multer({ storage: storage });
-// // GET user's portfolios
+});
+const upload = multer({ storage: storage });
 
 router.get('/freelancer/:id', getUserPortfolios);
-
-
-
-// // POST new portfolio
-router.post('/', upload.single('image'), createPortfolio); 
-
-// // Commented out routes
-// // router.get('/', getPortfolio);
-// // router.delete('/:id', deletePortfolio);
-// // router.patch('/:id', updatePortfolio);
+router.post('/', author, upload.single('image'), createPortfolio);
 
 module.exports = router;

@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const PaymentService = require('../controllers/payment');
+let {author,restrictTo}=require('../middlewares/authorization')
 
-router.post('/create-payment-intent', async (req, res) => {
+router.post('/create-payment-intent', author, async (req, res) => {
   try {
     const { projectId ,userId} = req.body;
     const paymentIntent = await PaymentService.createPaymentIntent(
@@ -17,7 +18,6 @@ router.post('/create-payment-intent', async (req, res) => {
 router.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
-
   try {
     event = stripe.webhooks.constructEvent(
       req.body,
@@ -27,15 +27,12 @@ router.post('/webhook', async (req, res) => {
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
   if (event.type === 'payment_intent.succeeded') {
     await PaymentService.handleSuccessfulPayment(event.data.object);
   }
-
   res.json({ received: true });
 });
-
-router.post('/release-payment', async (req, res) => {
+router.post('/release-payment', author, async (req, res) => {
   try {
     const { projectId } = req.body;
     const result = await PaymentService.releasePayment(projectId);
@@ -44,8 +41,7 @@ router.post('/release-payment', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-router.post('/withdraw', async (req, res) => {
+router.post('/withdraw', author, async (req, res) => {
   try {
     const { amount, method } = req.body;
     const transaction = await PaymentService.processWithdrawal(
@@ -53,7 +49,6 @@ router.post('/withdraw', async (req, res) => {
       amount,
       method
     );
-
     res.json(transaction);
   } catch (error) {
     res.status(500).json({ error: error.message });

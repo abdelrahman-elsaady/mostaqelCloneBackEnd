@@ -6,7 +6,6 @@ A robust backend API for a freelancing platform built with Node.js, Express, and
 ## 🚀 Features
 
 - User Authentication and Authorization
-- Real-time messaging using Pusher and Ably
 - Payment integration (PayPal, Stripe)
 - Project Management
 - Proposal System
@@ -26,7 +25,7 @@ A robust backend API for a freelancing platform built with Node.js, Express, and
 - **Runtime Environment:** Node.js
 - **Framework:** Express.js
 - **Database:** MongoDB with Mongoose
-- **Real-time Communication:** Pusher, Ably, Socket.io
+- **Real-time Communication:** Socket.io
 - **Payment Processing:** PayPal, Stripe
 - **File Upload:** Multer, Sharp
 - **Authentication:** JWT, bcryptjs
@@ -40,7 +39,6 @@ A robust backend API for a freelancing platform built with Node.js, Express, and
 - MongoDB
 - PayPal Developer Account
 - Stripe Account
-- Pusher Account
 - Ably Account
 
 ## 🔧 Installation
@@ -59,10 +57,6 @@ npm install
 3. Create a `.env` file in the root directory with the following variables:
 ```env
 MYDB=your_mongodb_connection_string
-PUSHER_APP_ID=your_pusher_app_id
-PUSHER_KEY=your_pusher_key
-PUSHER_SECRET=your_pusher_secret
-PUSHER_CLUSTER=your_pusher_cluster
 ABLY_API_KEY=your_ably_api_key
 PORT=3344
 ```
